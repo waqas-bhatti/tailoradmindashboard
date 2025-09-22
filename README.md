@@ -22,15 +22,16 @@ This project uses [`next/font`](https://nextjs.org/docs/app/building-your-applic
 
 ## Learn More
 
-To learn more about Next.js, take a look at the following resources:
+✨ Features
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+📱 Responsive Design: Mobile-first approach with collapsible sidebar
+🌙 Dark/Light Mode: System preference detection and manual toggle
+🔐 Authentication: Secure login/signup with Appwrite integration
+📊 Dashboard: Overview with charts and analytics
+📝 Form Management: Add/edit data with validation and persistence
+👥 User Management: Profile management and user history
+🗑️ Data Organization: Trash management and invoice generation
+⚡ TypeScript: Full type safety throughout the application
+🎨 Modern UI: Shadcn/ui components with custom styling
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
