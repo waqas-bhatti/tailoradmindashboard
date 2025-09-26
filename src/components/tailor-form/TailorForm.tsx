@@ -93,7 +93,7 @@ const TailorForm = () => {
   };
 
   return (
-    <section className="dark:bg-gray-900">
+    <section className="p-4 md:p-6 dark:bg-gray-900">
       <div className="mx-auto max-w-screen-xl">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-3 md:space-y-0 md:space-x-4 pb-4">
           <div className="flex flex-col sm:flex-row gap-4 sm:items-center">

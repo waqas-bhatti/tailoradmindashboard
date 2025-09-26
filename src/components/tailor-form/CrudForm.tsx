@@ -11,7 +11,7 @@ import {
   useRestoreCustomerMutation,
 } from "@/lib/reduxStore/customers/customersApi";
 
-import { addDays, isAfter, isBefore, isEqual, startOfDay } from "date-fns";
+import { addDays, endOfMonth, endOfWeek, isAfter, isBefore, isEqual, startOfDay, startOfMonth, startOfWeek, subDays } from "date-fns";
 import { userDetailSchema } from "@/app/schemas/AddNewSchema";
 import CustomerPreview from "./CustomerPreview";
 import { useForm } from "react-hook-form";
@@ -179,8 +179,8 @@ const CrudForm: React.FC<CrudFormProps> = ({
       setIsSubmitting(false);
     }
   };
-
-  function formatDateToYMD(date: Date | string): string {
+  
+   function formatDateToYMD(date: Date | string): string {
     try {
       const d = new Date(date);
       if (isNaN(d.getTime())) return "";
@@ -194,6 +194,7 @@ const CrudForm: React.FC<CrudFormProps> = ({
       return "";
     }
   }
+
 
   // In CrudForm.tsx
   const toggleExpand = (id: string, mode: "edit" | "preview") => {
@@ -256,101 +257,99 @@ const CrudForm: React.FC<CrudFormProps> = ({
       setIsSubmitting(false);
     }
   };
+
   
   // ================= FILTERING =================
   const filteredCustomers = customers.filter((customer) => {
-    let matches = true;
 
-    if (delayedSearchText) {
-      const query = delayedSearchText.toLowerCase();
-      if (
-        !customer.name.toLowerCase().includes(query) &&
-        !customer.number.toString().includes(query)
-      ) {
-        matches = false;
-      }
+    if (customer.is_deleted) return false;
+
+    // Agar koi filter active nahin, to sab show karein
+    if (!delayedSearchText && !status && !selectDate && !selectDay) {
+      return true;
     }
+
+    // Search filter
+    const matchesSearch = delayedSearchText
+      ? customer.name.toLowerCase().includes(delayedSearchText.toLowerCase()) ||
+        customer.number.toString().includes(delayedSearchText)
+      : true;
 
     // Status filter
-    if (status && customer.status !== status) matches = false;
+    const matchesStatus = status ? customer.status === status : true;
 
-    // Date filter - only run on client
-    if (isClient && selectDate) {
-      const createdDate = new Date(customer.created_at).toDateString();
-      if (new Date(selectDate).toDateString() !== createdDate) matches = false;
-    }
-
-    // Days filter - only run on client
-    if (isClient && selectDay) {
-      const createdAt = new Date(customer.created_at);
-      const today = new Date();
-      switch (selectDay) {
-        case "today":
-          matches = createdAt.toDateString() === today.toDateString();
-          break;
-        case "yesterday":
-          const yesterday = new Date();
-          yesterday.setDate(today.getDate() - 1);
-          matches = createdAt.toDateString() === yesterday.toDateString();
-          break;
-        case "week":
-          const weekAgo = new Date();
-          weekAgo.setDate(today.getDate() - 7);
-          matches = createdAt >= weekAgo && createdAt <= today;
-          break;
-        case "month":
-          matches =
-            createdAt.getMonth() === today.getMonth() &&
-            createdAt.getFullYear() === today.getFullYear();
-          break;
+    // Date filters
+    let matchesDate = true;
+    if (isClient) {
+      const createdAt = startOfDay(new Date(customer.created_at));
+      
+      // Specific date filter ko priority dein
+      if (selectDate) {
+        matchesDate = isEqual(createdAt, startOfDay(selectDate));
+      } 
+      // Agar specific date select nahin, to day range (today, week, etc.) check karein
+      else if (selectDay) {
+        const today = startOfDay(new Date());
+        switch (selectDay) {
+          case "today":
+            matchesDate = isEqual(createdAt, today);
+            break;
+          case "yesterday":
+            matchesDate = isEqual(createdAt, subDays(today, 1));
+            break;
+          case "week":
+            matchesDate = createdAt >= startOfWeek(today) && createdAt <= endOfWeek(today);
+            break;
+          case "month":
+            matchesDate = createdAt >= startOfMonth(today) && createdAt <= endOfMonth(today);
+            break;
+        }
       }
     }
 
-    return matches;
+    // Tamam active filters ko check karein
+    return matchesSearch && matchesStatus && matchesDate;
   });
 
   // Add this helper function at the top of your component
-  const isDeliveryDatePassed = (deliveryDate: string | null | undefined): boolean => {
-    if (!deliveryDate) return false;
+ const isDeliveryDatePassed = (deliveryDate: string | null | undefined): boolean => {
+  if (!deliveryDate) return false;
+  try {
+    const today = startOfDay(new Date());
+    const delivery = startOfDay(new Date(deliveryDate));
     
-    try {
-      const today = startOfDay(new Date());
-      const delivery = startOfDay(new Date(deliveryDate));
-      
-      // Check if delivery date is before today (has passed)
-      return isBefore(delivery, today) || isEqual(delivery, today) ;
-    } catch (error) {
-      console.error("Error parsing delivery date:", error);
-      return false;
-    }
-  };
-
+    // YEH SAHI LOGIC HAI: Check karein agar delivery date guzar chuki hai (isBefore) ya aaj hai (isEqual)
+    return isBefore(delivery, today) || isEqual(delivery, today);
+  } catch (error) {
+    console.error("Invalid date format for delivery_date:", deliveryDate, error);
+    return false;
+  }
+};
   // Replace your useEffect with this
   useEffect(() => {
     if (!isClient) return;
     
-    const updateOverdueOrders = async () => {
-    customers.forEach(async (customer) => {
-      if (customer.status === "complete" || !customer.delivery_date) return;
-
-      if (isDeliveryDatePassed(customer.delivery_date)) {
-        try {
-          await editCustomer({
-            ...customer,
-            status: "complete",
-            order_id: customer.id,
-            customers_id: customer.customers_id,
-          }).unwrap();
-        } catch (err) {
-          console.error("Auto status update failed:", err);
+    const updateOverdueOrders = () => {
+      console.log("Checking for overdue orders...");
+      customers.forEach(async (customer) => {
+        // Sirf 'pending' status wale orders ko check karein
+        if (customer.status === "pending" && isDeliveryDatePassed(customer.delivery_date)) {
+          console.log(`Updating status for order ID: ${customer.id}`);
+          try {
+            await editCustomer({
+              order_id: customer.id,
+              customers_id: customer.customers_id,
+              status: "complete",
+            }).unwrap();
+          } catch (err) {
+            console.error(`Failed to auto-update status for order ${customer.id}:`, err);
+          }
         }
-      }
-    });
-  };
-
+      });
+    };
     // Run this check periodically (every hour) to catch overdue orders
     updateOverdueOrders();
-    const interval = setInterval(updateOverdueOrders, 60 * 60 * 1000); 
+     const interval = setInterval(updateOverdueOrders, 60000); 
     
     return () => clearInterval(interval);
   }, [customers, isClient]);

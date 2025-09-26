@@ -2,33 +2,24 @@
 
 import Link from 'next/link'
 import React, { useEffect, useState } from 'react'
-import { useAuth } from '@/context/AuthContext';
-import { useRouter } from 'next/navigation';
-import Footer from '@/components/footer/Footer';
+import { useAuth } from '@/context/AuthContext'
+import { useRouter } from 'next/navigation'
+import Footer from '@/components/footer/Footer'
 
 const HomePage = () => {
-  const { user, loading } = useAuth();
-  const router = useRouter();
-  const [isRedirecting, setIsRedirecting] = useState(false);
+  const { user, loading } = useAuth()
+  const router = useRouter()
+  const [isRedirecting, setIsRedirecting] = useState(false)
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
 
   useEffect(() => {
-    // Prevent multiple redirects
     if (!loading && user && !isRedirecting) {
-      console.log('User authenticated on home page, redirecting to dashboard');
-      setIsRedirecting(true);
-
-      router.push('/dashboard');
-      router.refresh();
-      // Add small delay to prevent layout flash
-      // const timer = setTimeout(() => {
-      //    // Force refresh to ensure proper hydration
-      // }, 100);
-      
-      // return () => clearTimeout(timer);
+      setIsRedirecting(true)
+      router.push('/dashboard')
+      router.refresh()
     }
-  }, [user, loading, router, isRedirecting]);
+  }, [user, loading, router, isRedirecting])
 
-  // Show redirecting state
   if (isRedirecting) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
@@ -37,7 +28,7 @@ const HomePage = () => {
           <p className="text-gray-600 dark:text-gray-400">Redirecting to dashboard...</p>
         </div>
       </div>
-    );
+    )
   }
 
   if (loading) {
@@ -45,64 +36,98 @@ const HomePage = () => {
       <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
       </div>
-    );
+    )
   }
 
-  // Only render the home page if user is not authenticated
-  if (user) {
-    return null; // Will be caught by the redirecting state above
-  }
+  if (user) return null
+
   return (
-     <div className="bg-white text-gray-800">
-
+    <div className="bg-white text-gray-800">
       {/* Navbar */}
-<header className="fixed top-0 w-full bg-white/90 backdrop-blur shadow z-50 transition-all duration-300">
-  <div className="max-w-7xl mx-auto flex justify-between items-center px-6 py-4">
-    {/* Logo */}
-    <div className="flex items-center space-x-2">
-      <img
-        src="/images/logo/t-icon.png"
-        alt="Tailorix Logo"
-        className="w-8 h-8"
-      />
-      <h1 className="text-2xl font-bold text-indigo-600 tracking-tight">Tailorix</h1>
-    </div>
+      <header className="fixed top-0 w-full bg-white/90 backdrop-blur shadow z-50 transition-all duration-300">
+        <div className="max-w-7xl mx-auto flex justify-between items-center px-6 py-4">
+          {/* Logo */}
+          <div className="flex items-center space-x-2">
+            <img src="/images/logo/t-icon.png" alt="Tailorix Logo" className="w-8 h-8" />
+            <h1 className="text-2xl font-bold text-indigo-600 tracking-tight">Tailorix</h1>
+          </div>
 
-    {/* Desktop Nav */}
-    <nav className="hidden md:flex space-x-6 font-medium text-gray-700">
-      <a href="#taiorix" className="hover:text-indigo-600 transition-colors">Why Tailorix</a>
-      <a href="#feature" className="hover:text-indigo-600 transition-colors">Features</a>
-      <a href="#services" className="hover:text-indigo-600 transition-colors">Services</a>
-      <a href="#pricing" className="hover:text-indigo-600 transition-colors">Pricing</a>
-      <a href="#contact" className="hover:text-indigo-600 transition-colors">Contact</a>
-    </nav>
+          {/* Desktop Nav */}
+          <nav className="hidden md:flex space-x-6 font-medium text-gray-700">
+            <a href="#taiorix" className="hover:text-indigo-600 transition-colors">Why Tailorix</a>
+            <a href="#feature" className="hover:text-indigo-600 transition-colors">Features</a>
+            <a href="#services" className="hover:text-indigo-600 transition-colors">Services</a>
+            <a href="#pricing" className="hover:text-indigo-600 transition-colors">Pricing</a>
+            <a href="#contact" className="hover:text-indigo-600 transition-colors">Contact</a>
+          </nav>
 
-    {/* Actions */}
-    <div className="hidden md:flex items-center space-x-4">
-      <a
-        href="#demo"
-        className="px-4 py-2 rounded-lg border border-indigo-600 text-indigo-600 hover:bg-indigo-50 transition"
-      >
-        Dashboard Demo
+          {/* Desktop Actions */}
+          <div className="hidden md:flex items-center space-x-4">
+            <a href="#demo" className="px-4 py-2 rounded-lg border border-indigo-600 text-indigo-600 hover:bg-indigo-50 transition">
+              Dashboard Demo
             </a>
-              <Link
-                href="/sign-in"
-                className="bg-indigo-600 text-white px-5 py-2 rounded-lg shadow hover:bg-indigo-700 transition transform hover:scale-105"
-              >
-                Login
-              </Link>
-    </div>
+            <Link
+              href="/sign-in"
+              className="bg-indigo-600 text-white px-5 py-2 rounded-lg shadow hover:bg-indigo-700 transition transform hover:scale-105"
+            >
+              Login
+            </Link>
+          </div>
 
-    {/* Mobile Menu Button */}
-    <button className="md:hidden text-gray-700 hover:text-indigo-600">
-      <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-      </svg>
-    </button>
-  </div>
-</header>
-{/* Hero */}
-      
+          {/* Mobile Menu Button */}
+          <button
+            className="md:hidden text-gray-700 hover:text-indigo-600"
+            onClick={() => setIsMenuOpen(true)}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+        </div>
+      </header>
+
+      {/* Mobile Sidebar Drawer */}
+      <div
+        className={`fixed top-0 right-0 h-full w-64 bg-white shadow-lg z-50 transform transition-transform duration-500 ease-in-out ${
+          isMenuOpen ? 'translate-x-0' : 'translate-x-full'
+        }`}
+      >
+        <div className="flex justify-between items-center px-6 py-4 border-b">
+          <h2 className="text-xl font-bold text-indigo-600">Menu</h2>
+          <button onClick={() => setIsMenuOpen(false)} className="text-gray-700 hover:text-indigo-600">
+            <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        <nav className="flex flex-col px-6 py-6 space-y-4 text-gray-700">
+          <a href="#taiorix" onClick={() => setIsMenuOpen(false)} className="hover:text-indigo-600">Why Tailorix</a>
+          <a href="#feature" onClick={() => setIsMenuOpen(false)} className="hover:text-indigo-600">Features</a>
+          <a href="#services" onClick={() => setIsMenuOpen(false)} className="hover:text-indigo-600">Services</a>
+          <a href="#pricing" onClick={() => setIsMenuOpen(false)} className="hover:text-indigo-600">Pricing</a>
+          <a href="#contact" onClick={() => setIsMenuOpen(false)} className="hover:text-indigo-600">Contact</a>
+          <a href="#demo" onClick={() => setIsMenuOpen(false)} className="px-4 py-2 rounded-lg border border-indigo-600 text-indigo-600 hover:bg-indigo-50 transition">
+            Dashboard Demo
+          </a>
+          <Link
+            href="/sign-in"
+            onClick={() => setIsMenuOpen(false)}
+            className="bg-indigo-600 text-white px-5 py-2 rounded-lg shadow hover:bg-indigo-700 transition"
+          >
+            Login
+          </Link>
+        </nav>
+      </div>
+
+      {/* Overlay when menu is open */}
+      {isMenuOpen && (
+        <div
+          onClick={() => setIsMenuOpen(false)}
+          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40"
+        />
+      )}
+
+      {/* Hero */}
       <section className="pt-32 pb-20 bg-gray-50 animate-fade-in">
         <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-10 items-center">
           <div className="animate-slide-up">
@@ -113,7 +138,7 @@ const HomePage = () => {
               Simplify your tailoring business with powerful tools for managing
               customers, orders, measurements, and payments — all in one place.
             </p>
-            
+
             <a
               href="#pricing"
               className="bg-indigo-600 text-white px-6 py-3 rounded-lg shadow hover:bg-indigo-700 transition-all duration-200 transform hover:scale-105"
@@ -122,18 +147,18 @@ const HomePage = () => {
             </a>
           </div>
           <img
-            src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8YWRtaW4lMjBkYXNoYm9hcmR8ZW58MHx8MHx8fDA%3D"
+            src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=500&auto=format&fit=crop&q=60"
             alt="Tailor dashboard preview"
             className="rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105"
           />
         </div>
       </section>
 
-      {/* About */}
+      {/* Features */}
       <section id="feature" className="py-20 animate-fade-in">
         <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-10 items-center">
           <img
-            src="https://plus.unsplash.com/premium_photo-1663040605717-0f78fcff60be?q=80&w=871&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+            src="https://plus.unsplash.com/premium_photo-1663040605717-0f78fcff60be?q=80&w=871&auto=format&fit=crop"
             alt="Tailoring tools"
             className="rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105"
           />
@@ -175,7 +200,7 @@ const HomePage = () => {
             </div>
             <div className="p-6 bg-white shadow rounded-lg transform transition-all duration-300 hover:scale-105 hover:shadow-xl">
               <img
-                src="https://images.unsplash.com/photo-1603252110481-7ba873bf42ab?q=80&w=870&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                src="https://images.unsplash.com/photo-1603252110481-7ba873bf42ab?q=80&w=870&auto=format&fit=crop"
                 alt="Customer"
                 className="mx-auto mb-4 rounded "
               />
@@ -184,7 +209,7 @@ const HomePage = () => {
             </div>
             <div className="p-6 bg-white shadow rounded-lg transform transition-all duration-300 hover:scale-105 hover:shadow-xl">
               <img
-                src="https://images.unsplash.com/photo-1608222351212-18fe0ec7b13b?q=80&w=774&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                src="https://images.unsplash.com/photo-1608222351212-18fe0ec7b13b?q=80&w=774&auto=format&fit=crop"
                 alt="Analytics"
                 className="mx-auto mb-4 rounded"
               />
@@ -289,11 +314,10 @@ const HomePage = () => {
 
       {/* Footer */}
       <section id="contact" className="py-20 bg-gray-50 animate-fade-in">
-       <footer className="bg-gray-900 text-gray-200 py-12">
-        <Footer/>
-      </footer>
+        <footer className="bg-gray-900 text-gray-200 py-12">
+          <Footer />
+        </footer>
       </section>
-     
     </div>
   )
 }
