@@ -8,8 +8,8 @@ import { usePathname, useRouter } from 'next/navigation';
 interface AuthContextType {
   user: Models.User<Models.Preferences> | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<boolean>; // Return success status
-  signup: (email: string, password: string) => Promise<boolean>;
+  login: (email: string, password: string) => Promise<boolean>;
+  signup: (email: string, password: string, name?: string) => Promise<boolean>;
   logout: () => Promise<void>;
 }
 
@@ -34,11 +34,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       try {
         const currentUser = await authService.getCurrentUser();
         setUser(currentUser);
-        
-        // Redirect to dashboard if user is already logged in
-        // if (currentUser) {
-        //   router.replace('/dashboard'); // Use replace to avoid back button issues
-        // }
       } catch (error) {
         console.error('Auth initialization failed:', error);
         setUser(null);
@@ -49,33 +44,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     initializeAuth();
-  }, [router]);
-   // Handle navigation based on auth status
+  }, []);
+
+  // Handle navigation based on auth status
   useEffect(() => {
     if (!loading && isHydrated) {
-      // If user is authenticated and on auth pages, redirect to dashboard
       if (user && (pathname === '/sign-in' || pathname === '/sign-up' || pathname === '/')) {
         router.replace('/dashboard');
-      }
-      // If user is not authenticated and on protected pages, redirect to home
-      else if (!user && pathname.startsWith('/dashboard')) {
+      } else if (!user && pathname.startsWith('/dashboard')) {
         router.replace('/');
       }
     }
   }, [user, loading, isHydrated, pathname, router]);
 
-
   const login = async (email: string, password: string): Promise<boolean> => {
-    setLoading(true);
     try {
       await authService.login({ email, password });
       const currentUser = await authService.getCurrentUser();
       
       if (currentUser) {
         setUser(currentUser);
-        // Store user in localStorage for persistence
         localStorage.setItem('user', JSON.stringify(currentUser));
-        router.push("/dashboard")
+        router.replace('/dashboard'); // Use replace for immediate navigation
         return true;
       }
       
@@ -84,15 +74,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.error('Login error:', error);
       setUser(null);
       localStorage.removeItem('user');
-      
-      throw error; // Re-throw to be handled by the calling component
+      throw error;
     } finally {
       setLoading(false);
     }
   };
 
   const signup = async (email: string, password: string, name?: string): Promise<boolean> => {
-    setLoading(true);
     try {
       await authService.createAccount({ email, password });
       const currentUser = await authService.getCurrentUser();
@@ -100,7 +88,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (currentUser) {
         setUser(currentUser);
         localStorage.setItem('user', JSON.stringify(currentUser));
-        router.push('/sign-in')
+        router.replace('/sign-in');
         return true;
       }
       
@@ -116,23 +104,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = async () => {
-    setLoading(true);
     try {
       await authService.logout();
       setUser(null);
       localStorage.removeItem('user');
-      router.push('/');
+      router.replace('/');
     } catch (error) {
       console.error('Logout error:', error);
       setUser(null);
       localStorage.removeItem('user');
-      router.push('/');
+      router.replace('/');
     } finally {
       setLoading(false);
     }
   };
 
-  // Show loading spinner during hydration
   if (!isHydrated || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">

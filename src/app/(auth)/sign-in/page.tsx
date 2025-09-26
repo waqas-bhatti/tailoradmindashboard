@@ -1,55 +1,54 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import Link from "next/link";
-import { useAuth } from "@/context/AuthContext";
-import { useRouter } from "next/navigation";
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { useAuth } from '@/context/AuthContext';
+import { useRouter } from 'next/navigation';
 
 export default function SignInPage() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-
+  const [isSubmitting, setIsSubmitting] = useState(false); // Local state for form submission
   const { user, loading, login } = useAuth();
   const router = useRouter();
 
   // Redirect if already authenticated
   useEffect(() => {
     if (user && !loading) {
-      router.replace("/dashboard");
+      router.replace('/dashboard');
     }
   }, [user, loading, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
     setError(null);
+    setIsSubmitting(true); // Show spinner on button
 
     if (!email || !/\S+@\S+\.\S+/.test(email)) {
-      setError("Please enter a valid email");
-      setIsLoading(false);
+      setError('Please enter a valid email');
+      setIsSubmitting(false);
       return;
     }
 
     if (!password || password.length < 5) {
-      setError("Password must be at least 5 characters long");
-      setIsLoading(false);
+      setError('Password must be at least 5 characters long');
+      setIsSubmitting(false);
       return;
     }
 
     try {
       const success = await login(email, password);
       if (!success) {
-        setError("Login failed. Please try again.");
+        setError('Login failed. Please try again.');
       }
     } catch (err: any) {
       setError(
         err.message ||
-          "Login failed. Please check your credentials and try again."
+          'Login failed. Please check your credentials and try again.'
       );
     } finally {
-      setIsLoading(false);
+      setIsSubmitting(false); // Hide spinner after login attempt
     }
   };
 
@@ -111,7 +110,7 @@ export default function SignInPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                disabled={isLoading}
+                disabled={isSubmitting || loading} // Disable during submission or global loading
                 className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
               />
             </div>
@@ -130,29 +129,29 @@ export default function SignInPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                disabled={isLoading}
+                disabled={isSubmitting || loading} // Disable during submission or global loading
                 className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
               />
             </div>
 
             <button
               type="submit"
-              disabled={isLoading}
-              className="w-full bg-indigo-600 text-white py-2 rounded-lg shadow hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
+              disabled={isSubmitting || loading} // Disable during submission or global loading
+              className="w-full bg-indigo-600 text-white py-2 rounded-lg shadow hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition disabled:opacity-50"
             >
-              {isLoading ? (
+              {isSubmitting ? (
                 <div className="flex items-center justify-center">
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
                   Signing In...
                 </div>
               ) : (
-                "Sign In"
+                'Sign In'
               )}
             </button>
           </form>
 
           <div className="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
-            Don’t have an account?{" "}
+            Don’t have an account?{' '}
             <Link
               href="/sign-up"
               className="text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 font-medium"
