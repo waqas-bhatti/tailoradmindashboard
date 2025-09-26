@@ -15,13 +15,26 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { addCustomer, fetchCustomer } from "@/lib/reduxStore/customers/customerSlice";
+// import { addCustomer, fetchCustomer } from "@/lib/reduxStore/customers/customerSlice";
+import {
+  useGetCustomersQuery,
+  useAddCustomerMutation,
+} from "@/lib/reduxStore/customers/customersApi";
 import { z } from "zod";
 import { userDetailSchema } from "@/app/schemas/AddNewSchema";
 import type { AppDispatch } from "@/lib/store";
 import useSearchParams from '@/hooks/useSearchParams';
 const TailorForm = () => {
-  const dispatch = useDispatch<AppDispatch>();
+  // const dispatch = useDispatch<AppDispatch>();
+
+  const {
+      data: customers = [],
+      isLoading,
+      isError,
+      error,
+  } = useGetCustomersQuery();
+  const [addCustomer] = useAddCustomerMutation();
+
   const [isOpen, setIsOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -41,8 +54,7 @@ const TailorForm = () => {
       ...data,
     };
 
-    await dispatch(addCustomer(finalData)).unwrap();
-    await dispatch(fetchCustomer()).unwrap();
+    await addCustomer(finalData).unwrap();
     setIsOpen(false);
   } catch (err: any) {
     setSubmitError(err.message || "Failed to add customer.");
@@ -160,7 +172,7 @@ const TailorForm = () => {
                 <SelectGroup>
                   <SelectLabel>All Status</SelectLabel>
                   <SelectItem value="pending">Pending</SelectItem>
-                  <SelectItem value="preparing">In Preparing</SelectItem>
+                  {/* <SelectItem value="preparing">In Preparing</SelectItem> */}
                   <SelectItem value="complete">Completed</SelectItem>
                 </SelectGroup>
               </SelectContent>

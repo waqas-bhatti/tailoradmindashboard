@@ -1,27 +1,23 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
 
 export default function SignInPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  
-  const router = useRouter();
-  const { user, loading, login } = useAuth();
 
-  // If user is already authenticated, let the AuthProvider handle the redirect
+  const { user, loading, login } = useAuth();
+  const router = useRouter();
+
+  // Redirect if already authenticated
   useEffect(() => {
-    if (!loading && user) {
-      // The AuthProvider will handle the redirect, so just show a brief message
-      const timer = setTimeout(() => {
-        router.replace('/dashboard'); // Fallback redirect
-      }, 1000);
-      return () => clearTimeout(timer);
+    if (user && !loading) {
+      router.replace("/dashboard");
     }
   }, [user, loading, router]);
 
@@ -30,13 +26,12 @@ export default function SignInPage() {
     setIsLoading(true);
     setError(null);
 
-    // Basic validation
     if (!email || !/\S+@\S+\.\S+/.test(email)) {
       setError("Please enter a valid email");
       setIsLoading(false);
       return;
     }
-    
+
     if (!password || password.length < 5) {
       setError("Password must be at least 5 characters long");
       setIsLoading(false);
@@ -44,125 +39,127 @@ export default function SignInPage() {
     }
 
     try {
-      console.log("Attempting login for:", email);
       const success = await login(email, password);
-      
-      if (success) {
-        console.log("Login successful");
-        // Let the AuthProvider handle the navigation
-        // No need for additional router.push here
-      } else {
+      if (!success) {
         setError("Login failed. Please try again.");
       }
     } catch (err: any) {
-      console.error("Login error:", err);
-      setError(err.message || "Login failed. Please check your credentials and try again.");
+      setError(
+        err.message ||
+          "Login failed. Please check your credentials and try again."
+      );
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Show global loading state
-  if (loading && !user) {
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Show redirecting state when user is authenticated
-  if (loading && user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">Welcome back! Redirecting to dashboard...</p>
-        </div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
       </div>
     );
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900 p-4">
-      <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg w-full max-w-md">
-        <div className="text-center mb-6">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-            Sign In
-          </h1>
-          <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
-            Enter your email and password to sign in
+    <div className="min-h-screen flex flex-col md:flex-row">
+      {/* Left side - Branding */}
+      <div className="hidden md:flex flex-col justify-center items-center w-1/2 bg-gradient-to-br from-indigo-600 to-purple-600 text-white p-10 relative overflow-hidden">
+        <div className="absolute inset-0 bg-[url('/images/sewing-bg.jpg')] bg-cover bg-center opacity-20"></div>
+        <div className="relative z-10 text-center">
+          <img
+            src="/images/logo/t-icon.png"
+            alt="Tailorix Logo"
+            className="w-16 h-16 mx-auto mb-6"
+          />
+          <h1 className="text-4xl font-bold mb-4">Welcome to Tailorix</h1>
+          <p className="text-lg max-w-md mx-auto">
+            Simplify your tailoring business with powerful tools for managing
+            customers, orders, and more.
           </p>
         </div>
+      </div>
 
-        {error && (
-          <div className="mb-4 p-3 bg-red-100 border border-red-300 text-red-700 rounded-md text-center">
-            {error}
-          </div>
-        )}
+      {/* Right side - Sign-in card */}
+      <div className="flex items-center justify-center w-full md:w-1/2 bg-gray-50 dark:bg-gray-900 p-6">
+        <div className="w-full max-w-md bg-white dark:bg-gray-800 shadow-xl rounded-xl p-8">
+          <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white">
+            Sign in to Tailorix
+          </h2>
+          <p className="mt-2 text-sm text-center text-gray-600 dark:text-gray-400">
+            Enter your credentials to access your dashboard
+          </p>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Email <span className="text-red-500">*</span>
-            </label>
-            <input
-              id="email"
-              type="email"
-              placeholder="Enter your email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              autoComplete="email"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+          {error && (
+            <div className="mt-4 p-3 bg-red-100 border border-red-300 text-red-700 rounded-md text-center">
+              {error}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+            <div>
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+              >
+                Email <span className="text-red-500">*</span>
+              </label>
+              <input
+                id="email"
+                type="email"
+                placeholder="you@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                disabled={isLoading}
+                className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+              >
+                Password <span className="text-red-500">*</span>
+              </label>
+              <input
+                id="password"
+                type="password"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                disabled={isLoading}
+                className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+              />
+            </div>
+
+            <button
+              type="submit"
               disabled={isLoading}
-            />
+              className="w-full bg-indigo-600 text-white py-2 rounded-lg shadow hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
+            >
+              {isLoading ? (
+                <div className="flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Signing In...
+                </div>
+              ) : (
+                "Sign In"
+              )}
+            </button>
+          </form>
+
+          <div className="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
+            Don’t have an account?{" "}
+            <Link
+              href="/sign-up"
+              className="text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 font-medium"
+            >
+              Sign up
+            </Link>
           </div>
-
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Password <span className="text-red-500">*</span>
-            </label>
-            <input
-              id="password"
-              type="password"
-              placeholder="Enter your password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              autoComplete="current-password"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-              disabled={isLoading}
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            {isLoading ? (
-              <div className="flex items-center justify-center">
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                Signing In...
-              </div>
-            ) : (
-              'Sign In'
-            )}
-          </button>
-        </form>
-
-        <div className="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
-          Don't have an account?{" "}
-          <Link 
-            href="/sign-up" 
-            className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 underline"
-          >
-            Sign up
-          </Link>
         </div>
       </div>
     </div>

@@ -2,6 +2,14 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useReactToPrint } from "react-to-print";
+import {
+  useGetCustomersQuery,
+  useAddCustomerMutation,
+  useEditCustomerMutation,
+  useDeleteCustomerMutation,
+  useSoftDeleteCustomerMutation,
+  useRestoreCustomerMutation,
+} from "@/lib/reduxStore/customers/customersApi";
 
 import { addDays, isAfter, isBefore, isEqual, startOfDay } from "date-fns";
 import { userDetailSchema } from "@/app/schemas/AddNewSchema";
@@ -51,15 +59,27 @@ const CrudForm: React.FC<CrudFormProps> = ({
   status,
   delayedSearchText
 }) => {
-  const dispatch = useDispatch<AppDispatch>();
-  const { customers, loading, error } = useSelector(
-    (state: RootState) => state.customers
-  );
+  // const dispatch = useDispatch<AppDispatch>();
+  // const { customers, loading, error } = useSelector(
+  //   (state: RootState) => state.customers
+  // );
+
+  const {
+    data: customers = [],
+    isLoading,
+    isError,
+    error,
+  } = useGetCustomersQuery();
+
+   // ✅ Mutations
+  const [editCustomer] = useEditCustomerMutation();
+  const [softDeleteCustomer] = useSoftDeleteCustomerMutation();
 
   const [expandedState, setExpandedState] = useState<{
     id: string | null;
     mode: "edit" | "preview" | null;
   }>({ id: null, mode: null });
+
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -121,18 +141,23 @@ const CrudForm: React.FC<CrudFormProps> = ({
     setIsClient(true);
   }, []);
 
-  useEffect(() => {
-    dispatch(fetchCustomer()).unwrap().catch((err) => {
-      console.error("No Found Data about Customer:", err);
-    });
-  }, [dispatch]);
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     try {
+  //      await dispatch(fetchCustomer()).unwrap();
+  //     } catch (error) {
+  //       console.error("No Found Data about Customer:", error);
+  //     }
+  //   } 
+  //   fetchData();
+  // }, [dispatch]);
 
-  useEffect(() => {
-    // ✅ Only dispatch if customers are empty
-    if (customers.length === 0) {
-      dispatch(fetchCustomer());
-    }
-  }, [dispatch, customers.length]);
+  // useEffect(() => {
+  //   // ✅ Only dispatch if customers are empty
+  //   if (customers.length === 0) {
+  //     dispatch(fetchCustomer());
+  //   }
+  // }, [dispatch, customers.length]);
 
   const handleDelete = async (id: string) => {
     try {
@@ -142,7 +167,7 @@ const CrudForm: React.FC<CrudFormProps> = ({
       if (!customer) {
         throw new Error("Customer not found");
       }
-      await dispatch(softDeleteCustomer(id)).unwrap();
+      await softDeleteCustomer(id).unwrap();
       if (expandedState.id === id) {
         setExpandedState({ id: null, mode: null });
         form.reset();
@@ -220,10 +245,10 @@ const CrudForm: React.FC<CrudFormProps> = ({
       };
 
       console.log("Submitting customer data:", customerData);
-      await dispatch(editCustomers(customerData)).unwrap();
+      await editCustomer(customerData).unwrap();
       setExpandedState({ id: null, mode: null });
       form.reset();
-      await dispatch(fetchCustomer()).unwrap();
+      // await dispatch(fetchCustomer()).unwrap();
     } catch (err: any) {
       console.error("Failed to save customer:", err);
       setSubmitError(err.message || "Failed to save customer data. Please try again.");
@@ -293,7 +318,7 @@ const CrudForm: React.FC<CrudFormProps> = ({
       const delivery = startOfDay(new Date(deliveryDate));
       
       // Check if delivery date is before today (has passed)
-      return isBefore(delivery, today);
+      return isBefore(delivery, today) || isEqual(delivery, today) ;
     } catch (error) {
       console.error("Error parsing delivery date:", error);
       return false;
@@ -305,35 +330,30 @@ const CrudForm: React.FC<CrudFormProps> = ({
     if (!isClient) return;
     
     const updateOverdueOrders = async () => {
-      const today = new Date();
-      
-      customers.forEach(async (customer) => {
-        // Skip if already complete or no delivery date
-        if (customer.status === "complete" || !customer.delivery_date) return;
-        
-        if (isDeliveryDatePassed(customer.delivery_date)) {
-          try {
-            await dispatch(
-              editCustomers({
-                ...customer,
-                status: "complete",
-                order_id: customer.id,
-                customers_id: customer.customers_id,
-              })
-            ).unwrap();
-          } catch (err) {
-            console.error("Auto status update failed:", err);
-          }
+    customers.forEach(async (customer) => {
+      if (customer.status === "complete" || !customer.delivery_date) return;
+
+      if (isDeliveryDatePassed(customer.delivery_date)) {
+        try {
+          await editCustomer({
+            ...customer,
+            status: "complete",
+            order_id: customer.id,
+            customers_id: customer.customers_id,
+          }).unwrap();
+        } catch (err) {
+          console.error("Auto status update failed:", err);
         }
-      });
-    };
+      }
+    });
+  };
 
     // Run this check periodically (every hour) to catch overdue orders
     updateOverdueOrders();
-    const interval = setInterval(updateOverdueOrders, 60 * 60 * 1000); // Check every hour
+    const interval = setInterval(updateOverdueOrders, 60 * 60 * 1000); 
     
     return () => clearInterval(interval);
-  }, [customers, dispatch, isClient]);
+  }, [customers, isClient]);
 
   // ======================Pagination=======================
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -358,11 +378,11 @@ const CrudForm: React.FC<CrudFormProps> = ({
 
   return (
     <div className="overflow-x-auto p-4 bg-gray-100 dark:bg-gray-800 min-h-screen">
-      {error && <div className="mb-4 p-4 bg-red-100 text-red-700 rounded-lg">{error}</div>}
+      {error && <div className="mb-4 p-4 bg-red-100 text-red-700 rounded-lg">{isError}</div>}
       {submitError && (
         <div className="mb-4 p-4 bg-red-100 text-red-700 rounded-lg">{submitError}</div>
       )}
-      {loading && (
+      {isLoading && (
         <div className="mb-4 p-4 bg-blue-100 text-blue-700 rounded-lg">Loading...</div>
       )}
       {isSearching && (
@@ -376,6 +396,12 @@ const CrudForm: React.FC<CrudFormProps> = ({
           </div>
         )}
       </div>
+
+      <div className="mb-4 flex justify-between items-center">
+     <h2 className="text-xl font-semibold text-gray-700 dark:text-gray-300">
+    Total Customers : [{filteredCustomers.length} of {customers.length} total]
+     </h2>
+     </div>
 
       <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-900 rounded-lg shadow-md">
         <thead className="bg-gradient-to-r from-blue-600 via-blue-500 to-blue-700 text-white text-sm uppercase tracking-wider">

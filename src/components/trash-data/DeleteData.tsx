@@ -3,6 +3,12 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState, AppDispatch } from "@/lib/store";
 import { restoreCustomer, fetchCustomer } from "@/lib/reduxStore/customers/customerSlice";
+import {
+  useGetCustomersQuery,
+  useDeleteCustomerMutation,
+  useSoftDeleteCustomerMutation,
+  useRestoreCustomerMutation,
+} from "@/lib/reduxStore/customers/customersApi";
 import usePagination from "@/hooks/usePagination";
 import { Select, SelectContent, SelectTrigger, SelectValue } from '../ui/select';
 import { SelectItem } from '@radix-ui/react-select';
@@ -18,18 +24,30 @@ import {
 import useSearchParams from "@/hooks/useSearchParams";
 
 const DeleteData = () => {
-  const dispatch = useDispatch<AppDispatch>();
-  const { trashed, loading, error } = useSelector((state: RootState) => state.customers);
+  // const dispatch = useDispatch<AppDispatch>();
+  // const { trashed, loading, error } = useSelector((state: RootState) => state.customers);
+
+  const {
+      data: customers = [],
+      isLoading,
+      isError,
+      error,
+  } = useGetCustomersQuery();
+  
+  const [restoreCustomer] = useRestoreCustomerMutation();
+
+  const trashed = customers.filter((c) => c.is_deleted === true);
+
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  useEffect(() => {
-    dispatch(fetchCustomer());
-  }, [dispatch]);
+  // useEffect(() => {
+  //   dispatch(fetchCustomer());
+  // }, [dispatch]);
 
   const handleRestore = async (id: string) => {
     try {
       setIsSubmitting(true);
-      await dispatch(restoreCustomer(id)).unwrap();
+      await restoreCustomer(id).unwrap();
     } catch (error) {
       console.error("Failed to restore customer:", error);
     } finally {

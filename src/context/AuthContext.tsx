@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Models } from 'appwrite';
 import authService from '@/appwrite/auth';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 
 interface AuthContextType {
   user: Models.User<Models.Preferences> | null;
@@ -25,6 +25,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<Models.User<Models.Preferences> | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const pathname = usePathname();
   const [isHydrated, setIsHydrated] = useState(false);
 
   // Check initial auth status
@@ -49,19 +50,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     initializeAuth();
   }, [router]);
-
-  // Listen for user changes and handle navigation
+   // Handle navigation based on auth status
   useEffect(() => {
     if (!loading && isHydrated) {
-      if (user && window.location.pathname.includes('sign-in')) {
-        // Redirect to dashboard if user is authenticated on sign-in page
+      // If user is authenticated and on auth pages, redirect to dashboard
+      if (user && (pathname === '/sign-in' || pathname === '/sign-up' || pathname === '/')) {
         router.replace('/dashboard');
-      } else if (!user && !window.location.pathname.includes('sign-in') && !window.location.pathname.includes('sign-up')) {
-        // Redirect to sign-in if not authenticated on protected routes
+      }
+      // If user is not authenticated and on protected pages, redirect to home
+      else if (!user && pathname.startsWith('/dashboard')) {
         router.replace('/');
       }
     }
-  }, [user, loading, isHydrated, router]);
+  }, [user, loading, isHydrated, pathname, router]);
+
 
   const login = async (email: string, password: string): Promise<boolean> => {
     setLoading(true);
@@ -82,6 +84,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.error('Login error:', error);
       setUser(null);
       localStorage.removeItem('user');
+      
       throw error; // Re-throw to be handled by the calling component
     } finally {
       setLoading(false);

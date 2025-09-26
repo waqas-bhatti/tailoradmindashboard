@@ -26,6 +26,7 @@ import {
   editCustomers,
   fetchCustomer,
 } from "@/lib/reduxStore/customers/customerSlice";
+import { useGetCustomersQuery } from "@/lib/reduxStore/customers/customersApi";
 import type { User } from "@/types/customerTypes";
 import { useDispatch } from "react-redux";
 import { Loader2 } from "lucide-react";
@@ -172,8 +173,13 @@ return <Input type="text" placeholder={field.placeholder} {...formField} />;
 };
 
 const FormData = ({ onClose, customer, onSubmit, isSubmitting }: FormDataProps) => {
-  const dispatch = useDispatch<AppDispatch>();
-  const [error, setError] = useState<string | null>(null);
+  const {
+      data: customers = [],
+      isLoading,
+      isError,
+      error,
+    } = useGetCustomersQuery();
+  // const [error, setError] = useState<string | null>(null);
   const [existingCustomer, setExistingCustomer] = useState<User | null>(null);
 
 
@@ -212,7 +218,7 @@ const FormData = ({ onClose, customer, onSubmit, isSubmitting }: FormDataProps) 
           address: "",
           kameez_length: "",
           salwar_length: "",
-        bazo_length: "",
+          bazo_length: "",
           neck_size : "",
           suit_style: "",
           chest: "",
@@ -252,21 +258,21 @@ const FormData = ({ onClose, customer, onSubmit, isSubmitting }: FormDataProps) 
   const numberValue = form.watch("number");
 
   useEffect(() => {
-    if (!numberValue) {
-      setExistingCustomer(null);
-      return;
-    }
+  if (!numberValue) {
+    setExistingCustomer(null);
+    return;
+  }
 
-    dispatch(fetchCustomer()).then((action: any) => {
-      if (action.payload) {
-        const match = action.payload.find((c: User) => c.number === numberValue);
-        setExistingCustomer(match || null);
-      }
-    });
-  }, [numberValue, dispatch]);
+  // console.log("RTK customers array length:", customers.length);
+  // // eslint-disable-next-line no-console
+  // console.log("RTK customers (first 3):", customers.slice(0, 3));
+
+  const match = customers.find((c: User) => String(c.number) === String(numberValue));
+  setExistingCustomer(match || null);
+}, [numberValue, customers]);
 
   const useExistingCustomer = () => {
-    if (existingCustomer) {
+    if (existingCustomer) { 
       form.reset({
         name: existingCustomer.name || "",
         number: existingCustomer.number || "",
@@ -305,7 +311,6 @@ const FormData = ({ onClose, customer, onSubmit, isSubmitting }: FormDataProps) 
     onClose();
   } catch (error) {
     console.error("Submission error:", error); // Debug log
-    setError("Can't submit your data");
   }
 };
 
@@ -335,7 +340,7 @@ const FormData = ({ onClose, customer, onSubmit, isSubmitting }: FormDataProps) 
         </div>
       )}
 
-      {error && <div className="text-red-500 text-center">{error}</div>}
+      {error && <div className="text-red-500 text-center">{isError}</div>}
 
       <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6">
         <div className="text-center my-6">

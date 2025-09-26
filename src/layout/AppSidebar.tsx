@@ -273,7 +273,7 @@ const navItems: NavItem[] = [
             <>
               <Image
                 className="dark:hidden"
-                src="/images/logo/t.png"
+                src="/images/logo/t-dark.png"
                 alt="Logo"
                 width={150}
                 height={40}

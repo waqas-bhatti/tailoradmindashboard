@@ -13,6 +13,9 @@ import {
 import { Select, SelectContent, SelectTrigger, SelectValue } from '../ui/select';
 import { SelectItem } from '@radix-ui/react-select';
 import { fetchCustomer } from "@/lib/reduxStore/customers/customerSlice";
+import {
+  useGetCustomersQuery
+} from "@/lib/reduxStore/customers/customersApi";
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState, AppDispatch } from "@/lib/store";
 import useSearchParams from '@/hooks/useSearchParams';
@@ -21,8 +24,14 @@ import InvoicePrint from './InvoicePrint';
 
 // Remove the UserInvoiceProps interface and make component not expect any props
 export const UserInvoice: React.FC = () => {
-  const dispatch = useDispatch<AppDispatch>();
-  const { customers, loading, error } = useSelector((state: RootState) => state.customers);
+  // const dispatch = useDispatch<AppDispatch>();
+  // const { customers, loading, error } = useSelector((state: RootState) => state.customers);
+  const {
+      data: customers = [],
+      isLoading,
+      isError,
+      error,
+    } = useGetCustomersQuery();
   const [currentOrder, setCurrentOrder] = useState<any>(null);
 
   const printRef = useRef<HTMLDivElement>(null);
@@ -39,16 +48,16 @@ export const UserInvoice: React.FC = () => {
     }, 100);
   };
     
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        await dispatch(fetchCustomer());
-      } catch (error:any) {
-        throw new Error("Can't be fetch the User Data", error);
-      }
-    }
-    fetchData();
-  }, [dispatch]);
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     try {
+  //       await dispatch(fetchCustomer());
+  //     } catch (error:any) {
+  //       throw new Error("Can't be fetch the User Data", error);
+  //     }
+  //   }
+  //   fetchData();
+  // }, [dispatch]);
 
   const {
     searchText,
@@ -134,17 +143,17 @@ export const UserInvoice: React.FC = () => {
           </tr>
         </thead>
         <tbody>
-          {loading && (
+          {isLoading && (
             <tr>
               <td colSpan={3} className="text-center py-4">Loading...</td>
             </tr>
           )}
           {error && (
             <tr>
-              <td colSpan={3} className="text-center text-red-500 py-4">{error}</td>
+              <td colSpan={3} className="text-center text-red-500 py-4">{isError}</td>
             </tr>
           )}
-          {currentData.length === 0 && !loading && (
+          {currentData.length === 0 && !isLoading && (
             <tr>
               <td colSpan={3} className="text-center py-4">No customers found</td>
             </tr>
