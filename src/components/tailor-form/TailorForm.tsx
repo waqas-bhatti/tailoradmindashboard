@@ -23,15 +23,16 @@ import {
 import { z } from "zod";
 import { userDetailSchema } from "@/app/schemas/AddNewSchema";
 import type { AppDispatch } from "@/lib/store";
-import useSearchParams from '@/hooks/useSearchParams';
+import useSearchParams from "@/hooks/useSearchParams";
+
 const TailorForm = () => {
   // const dispatch = useDispatch<AppDispatch>();
 
   const {
-      data: customers = [],
-      isLoading,
-      isError,
-      error,
+    data: customers = [],
+    isLoading,
+    isError,
+    error,
   } = useGetCustomersQuery();
   const [addCustomer] = useAddCustomerMutation();
 
@@ -46,33 +47,32 @@ const TailorForm = () => {
   const toggleAccordion = () => setIsOpen((prev) => !prev);
 
   const handleSubmit = async (data: z.infer<typeof userDetailSchema>) => {
-  try {
-    setIsSubmitting(true);
-    setSubmitError(null);
+    try {
+      setIsSubmitting(true);
+      setSubmitError(null);
 
-    const finalData = {
-      ...data,
-    };
+      const finalData = {
+        ...data,
+      };
 
-    await addCustomer(finalData).unwrap();
-    setIsOpen(false);
-  } catch (err: any) {
-    setSubmitError(err.message || "Failed to add customer.");
-  } finally {
-    setIsSubmitting(false);
-  }
-};
+      await addCustomer(finalData).unwrap();
+      setIsOpen(false);
+    } catch (err: any) {
+      setSubmitError(err.message || "Failed to add customer.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const {
-      searchText,
-      delayedSearchText,
-      setSearchText,
-      clearSearch,
-      triggerSearch,
-      isSearching,
-    } = useSearchParams(300);
-  
-  
+    searchText,
+    delayedSearchText,
+    setSearchText,
+    clearSearch,
+    triggerSearch,
+    isSearching,
+  } = useSearchParams(300);
+
   // Clear filter and search input
   const handleClearFilter = () => {
     setSearchText("");
@@ -134,7 +134,10 @@ const TailorForm = () => {
                 </button>
               )}
             </div>
-            <Select value={selectDay} onValueChange={(val) => setSelecthDay(val)}>
+            <Select
+              value={selectDay}
+              onValueChange={(val) => setSelecthDay(val)}
+            >
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Select a Days" />
               </SelectTrigger>
@@ -164,7 +167,10 @@ const TailorForm = () => {
               /> */}
             </div>
             {/* Fixed Status Select */}
-            <Select value={selectStatus} onValueChange={(val) => setSelectStatus(val)}>
+            <Select
+              value={selectStatus}
+              onValueChange={(val) => setSelectStatus(val)}
+            >
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Select a Status" />
               </SelectTrigger>
@@ -182,26 +188,24 @@ const TailorForm = () => {
             <button
               type="button"
               onClick={toggleAccordion}
-              className="relative inline-flex items-center justify-center px-4 py-2.5 overflow-hidden font-medium text-white rounded-sm shadow-lg group"
+              className="inline-flex items-center justify-center px-4 py-2 font-medium text-white bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 rounded-sm"
             >
-              <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 animate-[spin_3s_linear_infinite] blur-lg opacity-75"></span>
-              <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 rounded"></span>
-              <span className="relative flex items-center">
-                {isOpen ? (
+              {isOpen ? (
+                <svg
+                  className="h-6 w-6 transition-transform duration-300"
+                  fill="currentColor"
+                  viewBox="0 0 18 18"
+                >
+                  <path
+                    fillRule="evenodd"
+                    clipRule="evenodd"
+                    d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                  />
+                </svg>
+              ) : (
+                <>
                   <svg
-                    className="h-6 w-6 transition-transform duration-300"
-                    fill="currentColor"
-                    viewBox="0 0 18 18"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      clipRule="evenodd"
-                      d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                    />
-                  </svg>
-                ) : (
-                  <svg
-                    className="h-4 w-4 mr-2 transform rotate-0 group-hover:rotate-90"
+                    className="h-4 w-4 mr-2"
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -211,9 +215,9 @@ const TailorForm = () => {
                       d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
                     />
                   </svg>
-                )}
-                {!isOpen && <span>Add Data</span>}
-              </span>
+                  <span>Add Data</span>
+                </>
+              )}
             </button>
           </div>
           {/* Clear Filter Button */}
@@ -229,12 +233,11 @@ const TailorForm = () => {
               Create New Tailor Entry
             </h3>
             <FormData
-                  onClose={() => setIsOpen(false)}
-                  onSubmit={handleSubmit}
-                  isSubmitting={isSubmitting}
-                
-                />
-            
+              onClose={() => setIsOpen(false)}
+              onSubmit={handleSubmit}
+              isSubmitting={isSubmitting}
+            />
+
             {submitError && (
               <div className="mt-4 p-4 bg-red-100 text-red-700 rounded">
                 {submitError}

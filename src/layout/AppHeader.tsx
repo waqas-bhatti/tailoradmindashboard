@@ -1,21 +1,23 @@
 "use client";
 import UserDropdown from "@/app/components/header/UserDropdown";
 import { ThemeToggleButton } from "@/common/ThemeToggleButton";
-// import { ThemeToggleButton } from "@/components/common/ThemeToggleButton";
-// import UserDropdown from "@/components/header/UserDropdown";
-import  useSidebar  from "@/context/SidebarContext";
+import useSidebar from "@/context/SidebarContext";
+import { useLanguage } from "@/context/LanguageContext";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useState, useEffect, useRef } from "react";
 
+type Language = "en" | "ur" | "hi" | "ar" | "de" | "fr" | "tr";
+
 interface AppHeaderProps {
   children?: React.ReactNode;
 }
-  
+
 const AppHeader: React.FC<AppHeaderProps> = () => {
   const [isApplicationMenuOpen, setApplicationMenuOpen] = useState(false);
-
   const { isMobileOpen, toggleSidebar, toggleMobileSidebar } = useSidebar();
+   const [isLangDropdownOpen, setLangDropdownOpen] = useState(false);
+  const { language, setLanguage } = useLanguage();
 
   const handleToggle = () => {
     if (window.innerWidth >= 1024) {
@@ -28,6 +30,7 @@ const AppHeader: React.FC<AppHeaderProps> = () => {
   const toggleApplicationMenu = () => {
     setApplicationMenuOpen(!isApplicationMenuOpen);
   };
+
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -44,6 +47,22 @@ const AppHeader: React.FC<AppHeaderProps> = () => {
       document.removeEventListener("keydown", handleKeyDown);
     };
   }, []);
+
+  // Language names for display
+  const languageNames = {
+    en: "English",
+    ur: "اردو",
+    hi: "हिन्दी",
+    ar: "العربية",
+    de: "Deutsch",
+    fr: "Français",
+    tr: "Türkçe",
+  };
+
+  // // Get text direction for RTL languages
+  // const getTextDirection = (lang: string): "rtl" | "ltr" => {
+  //   return lang === "ar" || lang === "ur" ? "rtl" : "ltr";
+  // };
 
   return (
     <header className="sticky top-0 flex w-full bg-white border-gray-200 z-40 dark:border-gray-800 dark:bg-gray-900 lg:border-b">
@@ -85,7 +104,6 @@ const AppHeader: React.FC<AppHeaderProps> = () => {
                 />
               </svg>
             )}
-            {/* Cross Icon */}
           </button>
 
           <Link href="/" className="lg:hidden">
@@ -127,13 +145,7 @@ const AppHeader: React.FC<AppHeaderProps> = () => {
 
           <div className="hidden lg:block">
             <form>
-              {/* <div className="relative">
-                <div className="px-4 py-2 text-sm text-gray-600 dark:text-gray-400 bg-gray-50 rounded-lg dark:bg-gray-800">
-    <div className="font-medium">{new Date().toLocaleDateString('en-US', { weekday: 'long' })}</div>
-    <div>{new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</div>
-    <div className="text-xs font-mono mt-1">{new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</div>
-  </div>
-              </div> */}
+              {/* Date component can be added here */}
             </form>
           </div>
         </div>
@@ -143,14 +155,59 @@ const AppHeader: React.FC<AppHeaderProps> = () => {
           } items-center justify-between w-full gap-4 px-5 py-4 lg:flex shadow-theme-md lg:justify-end lg:px-0 lg:shadow-none`}
         >
           <div className="flex items-center gap-2 2xsm:gap-3">
-            {/* <!-- Dark Mode Toggler --> */}
+            {/* Language Switcher */}
+            <div className="relative group">
+              <button
+                  onClick={() => setLangDropdownOpen((prev) => !prev)}
+                className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+                aria-label="Select language"
+              >
+                <span className="w-5 h-5">🌐</span>
+                <span>{languageNames[language]}</span>
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              
+              {/* Language Dropdown */}
+              <div className={`absolute right-0 z-50 w-48 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg top-full ${
+                isLangDropdownOpen ? "block" : "hidden"
+              } dark:bg-gray-800 dark:border-gray-700`}>
+                <div className="py-1">
+                  {Object.entries(languageNames).map(([code, name]) => (
+                    <button
+                      key={code}
+                      onClick={() => setLanguage(code as Language)}
+                      className={`flex items-center w-full px-4 py-2 text-sm text-left ${
+                        language === code
+                          ? "bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400"
+                          : "text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700"
+                      }`}
+                      // dir={getTextDirection(code)}
+                    >
+                      <span className="flex-1">{name}</span>
+                      {language === code && (
+                        <svg className="w-4 h-4 ml-2" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Dark Mode Toggler */}
             <ThemeToggleButton />
-            {/* <!-- Dark Mode Toggler --> */}
-           
           </div>
-          {/* <!-- User Area --> */}
-          <UserDropdown /> 
-    
+          
+          {/* User Area */}
+          <UserDropdown />
         </div>
       </div>
     </header>

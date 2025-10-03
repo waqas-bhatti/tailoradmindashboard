@@ -48,6 +48,8 @@ const normalizeUser = (raw: any): User => {
     payment: raw?.payment ?? "",
     clothsquantity: raw?.clothsquantity ?? "",
     totalBill: raw?.totalBill ?? "",
+    advanceAmount: raw?.advanceAmount ?? "",
+    remeaningAmount: raw?.remeaningAmount ?? "",
     basicPrice: raw?.basicPrice ?? "",
     delivery: raw?.delivery ?? "",
     delivery_date: raw?.delivery_date

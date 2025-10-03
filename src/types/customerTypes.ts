@@ -17,6 +17,8 @@ export interface Order {
   clothsquantity: string;
   totalBill: string;
   basicPrice: string;
+  remeaningAmount: string;
+  advanceAmount: string;
   delivery: string;
   status: string;
   created_at: string;
@@ -46,6 +48,8 @@ export interface User {
   payment: string;
   clothsquantity: string;
   totalBill: string;
+  remeaningAmount: string;
+  advanceAmount: string;
   basicPrice: string;
   delivery: string;
   delivery_date: string | null;

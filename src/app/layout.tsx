@@ -5,6 +5,8 @@ import { SidebarProvider } from '@/context/SidebarContext';
 import { AuthProvider } from '@/context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute';
 import type { Metadata } from 'next';
+import { LanguageProvider } from '@/context/LanguageContext';
+import { PremiumProvider } from '@/context/PremiumContext';
 
 const outfit = Outfit({
   subsets: ['latin'],
@@ -43,11 +45,15 @@ export default function RootLayout({
       <body className={`${outfit.className} dark:bg-gray-900`}>
         <AuthProvider>
           <ProtectedRoute>
-          <SidebarProvider>
-            <ThemeProvider>
-              {children}
-            </ThemeProvider>
-          </SidebarProvider>
+           <LanguageProvider>
+              <PremiumProvider> 
+                <SidebarProvider>
+                  <ThemeProvider>
+                    {children}
+                  </ThemeProvider>
+                </SidebarProvider>
+              </PremiumProvider>
+            </LanguageProvider>
           </ProtectedRoute>
         </AuthProvider>
       </body>

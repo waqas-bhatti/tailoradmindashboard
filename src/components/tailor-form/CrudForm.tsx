@@ -43,6 +43,9 @@ import {
 import { cn } from "@/lib/utils";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import PrintContent from "./PrintContent";
+import { useLanguage } from "@/context/LanguageContext";
+import { usePremium } from "@/context/PremiumContext";
+import { premiumFeatures } from "@/lib/premiumConfig";
 
 interface CrudFormProps {
   searchText: string;
@@ -59,17 +62,14 @@ const CrudForm: React.FC<CrudFormProps> = ({
   status,
   delayedSearchText
 }) => {
-  // const dispatch = useDispatch<AppDispatch>();
-  // const { customers, loading, error } = useSelector(
-  //   (state: RootState) => state.customers
-  // );
-
   const {
     data: customers = [],
     isLoading,
     isError,
     error,
   } = useGetCustomersQuery();
+
+  const { language } = useLanguage(); // Use global language context
 
    // ✅ Mutations
   const [editCustomer] = useEditCustomerMutation();
@@ -88,12 +88,12 @@ const CrudForm: React.FC<CrudFormProps> = ({
   const [itemsPerPage, setItemsPerPage] = useState(8);
   const printRef = useRef<HTMLDivElement>(null);
   const [isClient, setIsClient] = useState(false);
+  const { checkPremiumAccess } = usePremium();
 
   // Set up the print handler with react-to-print
   const handlePrint = useReactToPrint({
     contentRef: printRef,
     documentTitle: "Order Details",
-    onAfterPrint: () => console.log("Printed successfully")
   });
 
   // Ref to store the current order being printed
@@ -101,8 +101,10 @@ const CrudForm: React.FC<CrudFormProps> = ({
 
   // Function to prepare and trigger print for a specific order
   const printOrder = (order: any) => {
+    //  if (!checkPremiumAccess(premiumFeatures.invoice.print.id)) {
+    //   return;
+    // }
     setCurrentOrder(order);
-    // Use setTimeout to ensure state is updated before printing
     setTimeout(() => {
       handlePrint();
     }, 100);
@@ -130,6 +132,8 @@ const CrudForm: React.FC<CrudFormProps> = ({
       payment: "",
       clothsquantity: "",
       totalBill: "",
+      advanceAmount: "",
+          remeaningAmount: "",
       basicPrice: "",
       delivery: "",
       delivery_date: addDays(new Date(), 7).toISOString().split("T")[0],
@@ -140,24 +144,6 @@ const CrudForm: React.FC<CrudFormProps> = ({
   useEffect(() => {
     setIsClient(true);
   }, []);
-
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     try {
-  //      await dispatch(fetchCustomer()).unwrap();
-  //     } catch (error) {
-  //       console.error("No Found Data about Customer:", error);
-  //     }
-  //   } 
-  //   fetchData();
-  // }, [dispatch]);
-
-  // useEffect(() => {
-  //   // ✅ Only dispatch if customers are empty
-  //   if (customers.length === 0) {
-  //     dispatch(fetchCustomer());
-  //   }
-  // }, [dispatch, customers.length]);
 
   const handleDelete = async (id: string) => {
     try {
@@ -195,7 +181,6 @@ const CrudForm: React.FC<CrudFormProps> = ({
     }
   }
 
-
   // In CrudForm.tsx
   const toggleExpand = (id: string, mode: "edit" | "preview") => {
     if (expandedState.id === id && expandedState.mode === mode) {
@@ -210,6 +195,8 @@ const CrudForm: React.FC<CrudFormProps> = ({
         if (customerToEdit) {
           form.reset({
             ...customerToEdit,
+            advanceAmount: customerToEdit.advanceAmount ?? "",
+            remeaningAmount: customerToEdit.remeaningAmount ?? "",
             status: customerToEdit.status || "pending",
             customers_id: customerToEdit.customers_id || id,
             delivery_date: customerToEdit.delivery_date
@@ -249,7 +236,6 @@ const CrudForm: React.FC<CrudFormProps> = ({
       await editCustomer(customerData).unwrap();
       setExpandedState({ id: null, mode: null });
       form.reset();
-      // await dispatch(fetchCustomer()).unwrap();
     } catch (err: any) {
       console.error("Failed to save customer:", err);
       setSubmitError(err.message || "Failed to save customer data. Please try again.");
@@ -257,7 +243,6 @@ const CrudForm: React.FC<CrudFormProps> = ({
       setIsSubmitting(false);
     }
   };
-
   
   // ================= FILTERING =================
   const filteredCustomers = customers.filter((customer) => {
@@ -325,6 +310,7 @@ const CrudForm: React.FC<CrudFormProps> = ({
     return false;
   }
 };
+
   // Replace your useEffect with this
   useEffect(() => {
     if (!isClient) return;
@@ -366,6 +352,152 @@ const CrudForm: React.FC<CrudFormProps> = ({
 
   const totalPages = Math.ceil(filteredCustomers.length / itemsPerPage);
 
+  // Multilingual texts
+  const texts = {
+    en: {
+      title: "Total Customers",
+      noCustomers: "No customers found.",
+      name: "Name",
+      number: "Number",
+      deliveryDate: "Delivery Date",
+      status: "Status",
+      print: "Print",
+      actions: "Actions",
+      moveToTrash: "Move to Trash?",
+      trashDescription: "This customer will be removed from the active list and moved to Trash.",
+      cancel: "Cancel",
+      confirm: "Confirm",
+      loading: "Loading...",
+      error: "Error loading customers.",
+      searching: "Searching...",
+      rowsPerPage: "Rows per page",
+      complete: "complete",
+      pending: "pending"
+    },
+    ur: {
+      title: "کل گاہک",
+      noCustomers: "کوئی گاہک نہیں ملا۔",
+      name: "نام",
+      number: "نمبر",
+      deliveryDate: "ڈیلیوری تاریخ",
+      status: "حالت",
+      print: "پرنٹ",
+      actions: "اعمال",
+      moveToTrash: "کچرے میں منتقل کریں؟",
+      trashDescription: "یہ گاہک فعال فہرست سے ہٹا دیا جائے گا اور کچرے میں منتقل کر دیا جائے گا۔",
+      cancel: "منسوخ",
+      confirm: "تصدیق",
+      loading: "لوڈ ہو رہا ہے...",
+      error: "گاہکوں کو لوڈ کرنے میں خرابی۔",
+      searching: "تلاش ہو رہی ہے...",
+      rowsPerPage: "فی صفحہ قطاریں",
+      complete: "مکمل",
+      pending: "زیر التواء"
+    },
+    hi: {
+      title: "कुल ग्राहक",
+      noCustomers: "कोई ग्राहक नहीं मिला।",
+      name: "नाम",
+      number: "नंबर",
+      deliveryDate: "डिलीवरी तारीख",
+      status: "स्थिति",
+      print: "प्रिंट",
+      actions: "कार्रवाई",
+      moveToTrash: "कचरे में ले जाएं?",
+      trashDescription: "यह ग्राहक सक्रिय सूची से हटा दिया जाएगा और कचरे में ले जाया जाएगा।",
+      cancel: "रद्द करें",
+      confirm: "पुष्टि करें",
+      loading: "लोड हो रहा है...",
+      error: "ग्राहकों को लोड करने में त्रुटि।",
+      searching: "खोज रहा है...",
+      rowsPerPage: "प्रति पृष्ठ पंक्तियाँ",
+      complete: "पूर्ण",
+      pending: "लंबित"
+    },
+    ar: {
+      title: "إجمالي العملاء",
+      noCustomers: "لم يتم العثور على عملاء.",
+      name: "الاسم",
+      number: "الرقم",
+      deliveryDate: "تاريخ التسليم",
+      status: "الحالة",
+      print: "طباعة",
+      actions: "الإجراءات",
+      moveToTrash: "نقل إلى المهملات؟",
+      trashDescription: "سيتم إزالة هذا العميل من القائمة النشطة ونقله إلى المهملات.",
+      cancel: "إلغاء",
+      confirm: "تأكيد",
+      loading: "جاري التحميل...",
+      error: "خطأ في تحميل العملاء.",
+      searching: "جاري البحث...",
+      rowsPerPage: "صفوف في الصفحة",
+      complete: "مكتمل",
+      pending: "معلق"
+    },
+    de: {
+      title: "Gesamtkunden",
+      noCustomers: "Keine Kunden gefunden.",
+      name: "Name",
+      number: "Nummer",
+      deliveryDate: "Lieferdatum",
+      status: "Status",
+      print: "Drucken",
+      actions: "Aktionen",
+      moveToTrash: "In Papierkorb verschieben?",
+      trashDescription: "Dieser Kunde wird aus der aktiven Liste entfernt und in den Papierkorb verschoben.",
+      cancel: "Abbrechen",
+      confirm: "Bestätigen",
+      loading: "Lädt...",
+      error: "Fehler beim Laden der Kunden.",
+      searching: "Suche läuft...",
+      rowsPerPage: "Zeilen pro Seite",
+      complete: "abgeschlossen",
+      pending: "ausstehend"
+    },
+    fr: {
+      title: "Clients totaux",
+      noCustomers: "Aucun client trouvé.",
+      name: "Nom",
+      number: "Numéro",
+      deliveryDate: "Date de livraison",
+      status: "Statut",
+      print: "Imprimer",
+      actions: "Actions",
+      moveToTrash: "Déplacer vers la corbeille ?",
+      trashDescription: "Ce client sera retiré de la liste active et déplacé vers la corbeille.",
+      cancel: "Annuler",
+      confirm: "Confirmer",
+      loading: "Chargement...",
+      error: "Erreur lors du chargement des clients.",
+      searching: "Recherche en cours...",
+      rowsPerPage: "Lignes par page",
+      complete: "terminé",
+      pending: "en attente"
+    },
+    tr: {
+      title: "Toplam Müşteri",
+      noCustomers: "Müşteri bulunamadı.",
+      name: "İsim",
+      number: "Numara",
+      deliveryDate: "Teslimat Tarihi",
+      status: "Durum",
+      print: "Yazdır",
+      actions: "İşlemler",
+      moveToTrash: "Çöp Kutusuna Taşı?",
+      trashDescription: "Bu müşteri aktif listeden kaldırılacak ve çöp kutusuna taşınacak.",
+      cancel: "İptal",
+      confirm: "Onayla",
+      loading: "Yükleniyor...",
+      error: "Müşteriler yüklenirken hata.",
+      searching: "Aranıyor...",
+      rowsPerPage: "Sayfa başına satır",
+      complete: "tamamlandı",
+      pending: "beklemede"
+    }
+  };
+
+  const t = texts[language] || texts.en;
+
   // Don't render anything until we're on the client to avoid hydration mismatch
   if (!isClient) {
     return (
@@ -382,10 +514,10 @@ const CrudForm: React.FC<CrudFormProps> = ({
         <div className="mb-4 p-4 bg-red-100 text-red-700 rounded-lg">{submitError}</div>
       )}
       {isLoading && (
-        <div className="mb-4 p-4 bg-blue-100 text-blue-700 rounded-lg">Loading...</div>
+        <div className="mb-4 p-4 bg-blue-100 text-blue-700 rounded-lg">{t.loading}</div>
       )}
       {isSearching && (
-        <div className="mb-4 p-4 bg-yellow-100 text-yellow-700 rounded-lg">Searching...</div>
+        <div className="mb-4 p-4 bg-yellow-100 text-yellow-700 rounded-lg">{t.searching}</div>
       )}
 
       <div className="hidden">
@@ -398,26 +530,26 @@ const CrudForm: React.FC<CrudFormProps> = ({
 
       <div className="mb-4 flex justify-between items-center">
      <h2 className="text-xl font-semibold text-gray-700 dark:text-gray-300">
-    Total Customers : [{filteredCustomers.length} of {customers.length} total]
+      {t.title} : [{filteredCustomers.length} of {customers.length} total]
      </h2>
      </div>
 
       <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-900 rounded-lg shadow-md">
         <thead className="bg-gradient-to-r from-blue-600 via-blue-500 to-blue-700 text-white text-sm uppercase tracking-wider">
           <tr>
-            <th className="px-6 py-3">Name</th>
-            <th className="px-6 py-3">Number</th>
-            <th className="px-6 py-3">Delivery Date</th>
-            <th className="px-6 py-3">Status</th>
-            <th className="px-6 py-3">Print</th>
-            <th className="px-6 py-3 text-right">Actions</th>
+            <th className="px-6 py-3">{t.name}</th>
+            <th className="px-6 py-3">{t.number}</th>
+            <th className="px-6 py-3">{t.deliveryDate}</th>
+            <th className="px-6 py-3">{t.status}</th>
+            <th className="px-6 py-3">{t.print}</th>
+            <th className="px-6 py-3 text-right">{t.actions}</th>
           </tr>
         </thead>
         <tbody>
           {paginatedCustomers.length === 0 ? (
             <tr>
               <td colSpan={6} className="text-center py-6 text-gray-500 dark:text-gray-300">
-                No customers found.
+                {t.noCustomers}
               </td>
             </tr>
           ) : (
@@ -436,7 +568,7 @@ const CrudForm: React.FC<CrudFormProps> = ({
                           : "bg-yellow-500"
                       )}
                     >
-                      {customer.status}
+                      {customer.status === "complete" ? t.complete : t.pending}
                     </span>
                   </td>
                   <td className="px-4 py-3">
@@ -444,7 +576,7 @@ const CrudForm: React.FC<CrudFormProps> = ({
                           onClick={() => printOrder(customer)}
                           className="ml-4 px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm"
                         >
-                          Print
+                          {t.print}
                         </button>
                   </td>
                   <td className="px-4 py-3">
@@ -474,15 +606,15 @@ const CrudForm: React.FC<CrudFormProps> = ({
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                           <AlertDialogHeader>
-                            <AlertDialogTitle>Move to Trash?</AlertDialogTitle>
+                            <AlertDialogTitle>{t.moveToTrash}</AlertDialogTitle>
                             <AlertDialogDescription>
-                              This customer will be removed from the active list and moved to Trash.
+                              {t.trashDescription}
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogCancel>{t.cancel}</AlertDialogCancel>
                             <AlertDialogAction onClick={() => handleDelete(customer.id)}>
-                              Confirm
+                              {t.confirm}
                             </AlertDialogAction>
                           </AlertDialogFooter>
                         </AlertDialogContent>
@@ -531,7 +663,7 @@ const CrudForm: React.FC<CrudFormProps> = ({
             }}
           >
             <SelectTrigger className="w-[120px]">
-              <SelectValue placeholder="Rows per page" />
+              <SelectValue placeholder={t.rowsPerPage} />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="5">5</SelectItem>

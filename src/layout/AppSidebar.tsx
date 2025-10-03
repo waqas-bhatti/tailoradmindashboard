@@ -1,68 +1,137 @@
 "use client";
-import React, { useEffect, useRef, useState,useCallback } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import useSidebar from "../context/SidebarContext";
-import { Receipt } from 'lucide-react';
-import { House } from 'lucide-react';
-import { Shirt } from 'lucide-react';
-import { History } from 'lucide-react';
-import { Trash2 } from 'lucide-react';
-import { User } from 'lucide-react';
-import { ClockArrowDown } from 'lucide-react';
+import { useLanguage } from "@/context/LanguageContext";
+import { Receipt, House, Shirt, History, Trash2, User } from 'lucide-react';
 
-
+// Multilingual nav items define karein
 type NavItem = {
-  name: string;
+  nameEn: string;
+  nameUr: string;
+  nameHi: string;
+  nameAr: string;
+  nameDe: string;
+  nameFr: string;
+  nameTr: string;
   icon: React.ReactNode;
   path?: string;
-  subItems?: { name: string; path: string; pro?: boolean; new?: boolean }[];
+  subItems?: { 
+    nameEn: string;
+    nameUr: string;
+    nameHi: string;
+    nameAr: string;
+    nameDe: string;
+    nameFr: string;
+    nameTr: string;
+    path: string; 
+    pro?: boolean; 
+    new?: boolean;
+  }[];
 };
 
 const navItems: NavItem[] = [
- 
   {
     icon: <House />,
-    name: "Home",
+    nameEn: "Home",
+    nameUr: "ہوم",
+    nameHi: "होम",
+    nameAr: "الرئيسية",
+    nameDe: "Startseite",
+    nameFr: "Accueil",
+    nameTr: "Ana Sayfa",
     path: "/dashboard",
   },
   {
     icon: <Shirt />,
-    name: "Add Data",
+    nameEn: "Add Data",
+    nameUr: "ڈیٹا شامل کریں",
+    nameHi: "डेटा जोड़ें",
+    nameAr: "إضافة بيانات",
+    nameDe: "Daten hinzufügen",
+    nameFr: "Ajouter des données",
+    nameTr: "Veri Ekle",
     path: "/dashboard/add-data",
   },
   {
     icon: <History />,
-   name: "History",
-    subItems: [{ name: "User History", path: "/dashboard/user-history", pro: false },
-      // { name: "Transaction History", path: "/payment-history", pro: false }
+    nameEn: "History",
+    nameUr: "تاریخچہ",
+    nameHi: "इतिहास",
+    nameAr: "السجل",
+    nameDe: "Verlauf",
+    nameFr: "Historique",
+    nameTr: "Geçmiş",
+    path: "/dashboard/user-history",
+    subItems: [
+      { 
+        nameEn: "User History",
+        nameUr: "صارف کی تاریخ",
+        nameHi: "उपयोगकर्ता इतिहास",
+        nameAr: "سجل المستخدم",
+        nameDe: "Benutzerverlauf",
+        nameFr: "Historique utilisateur",
+        nameTr: "Kullanıcı Geçmişi",
+        path: "/dashboard/user-history", 
+        pro: false 
+      },
     ],
-   path : "/dashboard/user-history"
-   },
-  
+  },
   {
     icon: <Receipt />,
-    name: "Invoice",
+    nameEn: "Invoice",
+    nameUr: "انوائس",
+    nameHi: "चालान",
+    nameAr: "فاتورة",
+    nameDe: "Rechnung",
+    nameFr: "Facture",
+    nameTr: "Fatura",
     path: "/dashboard/invoice",
   },
   {
     icon: <Trash2 />,
-    name: "Trash",
+    nameEn: "Trash",
+    nameUr: "کچرا",
+    nameHi: "कचरा",
+    nameAr: "المهملات",
+    nameDe: "Papierkorb",
+    nameFr: "Corbeille",
+    nameTr: "Çöp",
     path: "/dashboard/trash",
   },
-
   {
     icon: <User />,
-    name: "User Profile",
+    nameEn: "User Profile",
+    nameUr: "صارف پروفائل",
+    nameHi: "उपयोगकर्ता प्रोफाइल",
+    nameAr: "ملف المستخدم",
+    nameDe: "Benutzerprofil",
+    nameFr: "Profil utilisateur",
+    nameTr: "Kullanıcı Profili",
     path: "/dashboard/profile",
   },
-  
 ];
 
- export const AppSidebar: React.FC = () => {
+export const AppSidebar: React.FC = () => {
   const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebar();
+  const { language } = useLanguage();
   const pathname = usePathname();
+
+  // Helper function to get name based on current language - sirf name properties ke liye
+  const getName = (item: { 
+    nameEn: string;
+    nameUr: string;
+    nameHi: string;
+    nameAr: string;
+    nameDe: string;
+    nameFr: string;
+    nameTr: string;
+  }) => {
+    const langKey = `name${language.charAt(0).toUpperCase() + language.slice(1)}` as keyof typeof item;
+    return item[langKey] || item.nameEn;
+  };
 
   const renderMenuItems = (
     navItems: NavItem[],
@@ -70,15 +139,15 @@ const navItems: NavItem[] = [
   ) => (
     <ul className="flex flex-col gap-4">
       {navItems.map((nav, index) => (
-        <li key={nav.name}>
+        <li key={nav.nameEn}>
           {nav.subItems ? (
             <button
               onClick={() => handleSubmenuToggle(index, menuType)}
-             className={`menu-item group ${
-               openSubmenu?.type === menuType && openSubmenu?.index === index
-                 ? "menu-item-active"
-                 : "menu-item-inactive"
-             } cursor-pointer justify-start`}
+              className={`menu-item group ${
+                openSubmenu?.type === menuType && openSubmenu?.index === index
+                  ? "menu-item-active"
+                  : "menu-item-inactive"
+              } cursor-pointer justify-start`}
             >
               <span
                 className={` ${
@@ -90,18 +159,8 @@ const navItems: NavItem[] = [
                 {nav.icon}
               </span>
               {(isExpanded || isHovered || isMobileOpen) && (
-                <span className={`menu-item-text`}>{nav.name}</span>
+                <span className={`menu-item-text`}>{getName(nav)}</span>
               )}
-              {/* {(isExpanded || isHovered || isMobileOpen) && (
-                <ClockArrowDown
-                  className={`ml-auto w-5 h-5 transition-transform duration-200  ${
-                    openSubmenu?.type === menuType &&
-                    openSubmenu?.index === index
-                      ? "rotate-180 text-brand-500"
-                      : ""
-                  }`}
-                />
-              )} */}
             </button>
           ) : (
             nav.path && (
@@ -121,7 +180,7 @@ const navItems: NavItem[] = [
                   {nav.icon}
                 </span>
                 {(isExpanded || isHovered || isMobileOpen) && (
-                  <span className={`menu-item-text`}>{nav.name}</span>
+                  <span className={`menu-item-text`}>{getName(nav)}</span>
                 )}
               </Link>
             )
@@ -141,7 +200,7 @@ const navItems: NavItem[] = [
             >
               <ul className="mt-2 space-y-1 ml-9">
                 {nav.subItems.map((subItem) => (
-                  <li key={subItem.name}>
+                  <li key={subItem.nameEn}>
                     <Link
                       href={subItem.path}
                       className={`menu-dropdown-item ${
@@ -150,27 +209,24 @@ const navItems: NavItem[] = [
                           : "menu-dropdown-item-inactive"
                       }`}
                     >
-                      {subItem.name}
+                      {/* Sirf name properties pass karein getName function ko */}
+                      {getName({
+                        nameEn: subItem.nameEn,
+                        nameUr: subItem.nameUr,
+                        nameHi: subItem.nameHi,
+                        nameAr: subItem.nameAr,
+                        nameDe: subItem.nameDe,
+                        nameFr: subItem.nameFr,
+                        nameTr: subItem.nameTr
+                      })}
                       <span className="flex items-center gap-1 ml-auto">
                         {subItem.new && (
-                          <span
-                            className={`ml-auto ${
-                              isActive(subItem.path)
-                                ? "menu-dropdown-badge-active"
-                                : "menu-dropdown-badge-inactive"
-                            } menu-dropdown-badge `}
-                          >
+                          <span className="menu-dropdown-badge">
                             new
                           </span>
                         )}
                         {subItem.pro && (
-                          <span
-                            className={`ml-auto ${
-                              isActive(subItem.path)
-                                ? "menu-dropdown-badge-active"
-                                : "menu-dropdown-badge-inactive"
-                            } menu-dropdown-badge `}
-                          >
+                          <span className="menu-dropdown-badge">
                             pro
                           </span>
                         )}
@@ -190,13 +246,10 @@ const navItems: NavItem[] = [
     type: "main" | "others";
     index: number;
   } | null>(null);
-  const [subMenuHeight, setSubMenuHeight] = useState<Record<string, number>>(
-    {}
-  );
+  const [subMenuHeight, setSubMenuHeight] = useState<Record<string, number>>({});
   const subMenuRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
-  // const isActive = (path: string) => path === pathname;
-   const isActive = useCallback((path: string) => path === pathname, [pathname]);
+  const isActive = useCallback((path: string) => path === pathname, [pathname]);
 
   useEffect(() => {
     // Check if the current path matches any submenu item
@@ -222,7 +275,7 @@ const navItems: NavItem[] = [
     if (!submenuMatched) {
       setOpenSubmenu(null);
     }
-  }, [pathname,isActive]);
+  }, [pathname, isActive]);
 
   useEffect(() => {
     // Set the height of the submenu items when the submenu is opened
@@ -262,12 +315,10 @@ const navItems: NavItem[] = [
         }
         ${isMobileOpen ? "translate-x-0" : "-translate-x-full"}
         lg:translate-x-0`}
-      onMouseEnter={() => !isExpanded && setIsHovered(true)}
+      onClick={() => !isExpanded && setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <div
-        className="py-8 flex justify-start"
-      >
+      <div className="py-8 flex justify-start">
         <Link href="/">
           {isExpanded || isHovered || isMobileOpen ? (
             <>
@@ -300,38 +351,7 @@ const navItems: NavItem[] = [
         <nav className="mb-6">
           <div className="flex flex-col gap-4">
             <div>
-              {/* <h2
-                className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 ${
-                  !isExpanded && !isHovered
-                    ? "lg:justify-center"
-                    : "justify-start"
-                }`}
-              >
-                {isExpanded || isHovered || isMobileOpen ? (
-                  ""
-                ) : (
-                  <HorizontaLDots />
-                )}
-              </h2> */}
               {renderMenuItems(navItems, "main")}
-            </div>
-
-            <div className="">
-              <h2
-                className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 ${
-                  !isExpanded && !isHovered
-                    ? "lg:justify-center"
-                    : "justify-start"
-                }`}
-              >
-                {/* {isExpanded || isHovered || isMobileOpen ? (
-                  "Others"
-                ) : (
-                  <HorizontaLDots />
-                )} */}
-              </h2>
-              {/* {renderMenuItems(navItems, "main")} */}
-
             </div>
           </div>
         </nav>

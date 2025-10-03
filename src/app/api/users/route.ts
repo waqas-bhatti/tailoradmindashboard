@@ -51,6 +51,8 @@ export async function POST(request: Request) {
       color,
       payment,
       totalBill,
+      advanceAmount,
+      remeaningAmount,
       basicPrice,
       delivery,
       clothsquantity,
@@ -146,6 +148,8 @@ export async function POST(request: Request) {
           payment,
           clothsquantity,
           totalBill,
+          advanceAmount,
+          remeaningAmount,
           basicPrice,
           delivery,
           delivery_date,
@@ -213,6 +217,8 @@ export async function PUT(request: Request) {
         "payment",
         "clothsquantity",
         "totalBill",
+        "advanceAmount",
+        "remeaningAmount",
         "basicPrice",
         "delivery",
         "delivery_date",
@@ -310,3 +316,5 @@ export async function DELETE(request: Request) {
     );
   }
 }
+
+

@@ -1,6 +1,5 @@
 import { Client, Databases, Query, ID, Account } from "appwrite";
 import config from "@/Config/config";
-import authServices from "./auth";
 
 export class StorageServices {
   private client: Client;

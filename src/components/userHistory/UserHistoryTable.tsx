@@ -13,6 +13,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination"
 import { Select, SelectContent, SelectTrigger, SelectValue, SelectItem } from '../ui/select';
+import { useLanguage } from "@/context/LanguageContext"; // Import language context
 
 interface UserHistoryTableProps {
   customer: User[];
@@ -22,6 +23,7 @@ interface UserHistoryTableProps {
 const UserHistoryTable: React.FC<UserHistoryTableProps> = ({ customer, searchText }) => {
   const [openRow, setOpenRow] = useState<string | null>(null);
   const [openOrders, setOpenOrders] = useState<{ [key: string]: boolean }>({});
+  const { language } = useLanguage(); // Use global language context
   
   const toggleRow = (id: string) => {
     setOpenRow(openRow === id ? null : id);
@@ -64,6 +66,201 @@ const UserHistoryTable: React.FC<UserHistoryTableProps> = ({ customer, searchTex
     return (bLatestOrder.order_id || bLatestOrder.id) - (aLatestOrder.order_id || aLatestOrder.id);
   });
 
+  // Multilingual texts
+  const texts = {
+    en: {
+      suitNo: "Suit No",
+      name: "Name",
+      number: "Number",
+      lastActivity: "Last Activity",
+      customerInfo: "Customer Information",
+      address: "Address",
+      order: "Order",
+      status: "Status",
+      kameezLength: "Kameez Length",
+      salwarLength: "Salwar Length",
+      suitStyle: "Suit Style",
+      chest: "Chest",
+      waist: "Waist",
+      shoulder: "Shoulder",
+      asteen: "Asteen",
+      collarStyle: "Collar Style",
+      bottomWidth: "Bottom Width",
+      salwarType: "Salwar Type",
+      color: "Color",
+      payment: "Payment",
+      clothsNumber: "Cloths Number",
+      basicPrice: "Basic Price",
+      totalBill: "Total Bill",
+      delivery: "Delivery",
+      rowsPerPage: "Rows per page",
+    },
+    ur: {
+      suitNo: "سوٹ نمبر",
+      name: "نام",
+      number: "نمبر",
+      lastActivity: "آخری سرگرمی",
+      customerInfo: "گاہک کی معلومات",
+      address: "پتہ",
+      order: "آرڈر",
+      status: "حالت",
+      kameezLength: "قمیض کی لمبائی",
+      salwarLength: "شلوار کی لمبائی",
+      suitStyle: "سوٹ کا انداز",
+      chest: "چھاتی",
+      waist: "کمر",
+      shoulder: "کندھا",
+      asteen: "آستین",
+      collarStyle: "کالر کا انداز",
+      bottomWidth: "گھیرا",
+      salwarType: "شلوار کی قسم",
+      color: "رنگ",
+      payment: "ادائیگی",
+      clothsNumber: "کپڑوں کی تعداد",
+      basicPrice: "بنیادی قیمت",
+      totalBill: "کل بل",
+      delivery: "ڈلیوری",
+      rowsPerPage: "فی صفحہ قطاریں",
+    },
+    hi: {
+      suitNo: "सूट नंबर",
+      name: "नाम",
+      number: "नंबर",
+      lastActivity: "अंतिम गतिविधि",
+      customerInfo: "ग्राहक जानकारी",
+      address: "पता",
+      order: "ऑर्डर",
+      status: "स्थिति",
+      kameezLength: "कमीज की लंबाई",
+      salwarLength: "सलवार की लंबाई",
+      suitStyle: "सूट शैली",
+      chest: "छाती",
+      waist: "कमर",
+      shoulder: "कंधा",
+      asteen: "आस्तीन",
+      collarStyle: "कॉलर शैली",
+      bottomWidth: "घेरा",
+      salwarType: "सलवार प्रकार",
+      color: "रंग",
+      payment: "भुगतान",
+      clothsNumber: "कपड़ों की संख्या",
+      basicPrice: "मूल कीमत",
+      totalBill: "कुल बिल",
+      delivery: "डिलीवरी",
+      rowsPerPage: "प्रति पृष्ठ पंक्तियाँ",
+    },
+    ar: {
+      suitNo: "رقم البدلة",
+      name: "الاسم",
+      number: "الرقم",
+      lastActivity: "النشاط الأخير",
+      customerInfo: "معلومات العميل",
+      address: "العنوان",
+      order: "طلب",
+      status: "الحالة",
+      kameezLength: "طول القميص",
+      salwarLength: "طول الشلوار",
+      suitStyle: "نمط البدلة",
+      chest: "الصدر",
+      waist: "الخصر",
+      shoulder: "الكتف",
+      asteen: "كم",
+      collarStyle: "نمط الياقة",
+      bottomWidth: "المحيط",
+      salwarType: "نوع الشلوار",
+      color: "لون",
+      payment: "الدفع",
+      clothsNumber: "عدد الملابس",
+      basicPrice: "السعر الأساسي",
+      totalBill: "الفاتورة الإجمالية",
+      delivery: "التوصيل",
+      rowsPerPage: "صفوف في الصفحة",
+    },
+    de: {
+      suitNo: "Anzugnummer",
+      name: "Name",
+      number: "Nummer",
+      lastActivity: "Letzte Aktivität",
+      customerInfo: "Kundeninformation",
+      address: "Adresse",
+      order: "Bestellung",
+      status: "Status",
+      kameezLength: "Kameez Länge",
+      salwarLength: "Salwar Länge",
+      suitStyle: "Anzugstil",
+      chest: "Brust",
+      waist: "Taille",
+      shoulder: "Schulter",
+      asteen: "Ärmel",
+      collarStyle: "Kragenstil",
+      bottomWidth: "Umfang",
+      salwarType: "Salwar Typ",
+      color: "Farbe",
+      payment: "Zahlung",
+      clothsNumber: "Anzahl Kleider",
+      basicPrice: "Grundpreis",
+      totalBill: "Gesamtrechnung",
+      delivery: "Lieferung",
+      rowsPerPage: "Zeilen pro Seite",
+    },
+    fr: {
+      suitNo: "Numéro de costume",
+      name: "Nom",
+      number: "Numéro",
+      lastActivity: "Dernière activité",
+      customerInfo: "Informations client",
+      address: "Adresse",
+      order: "Commande",
+      status: "Statut",
+      kameezLength: "Longueur Kameez",
+      salwarLength: "Longueur Salwar",
+      suitStyle: "Style de costume",
+      chest: "Poitrine",
+      waist: "Taille",
+      shoulder: "Épaule",
+      asteen: "Manche",
+      collarStyle: "Style de col",
+      bottomWidth: "Circonférence",
+      salwarType: "Type Salwar",
+      color: "Couleur",
+      payment: "Paiement",
+      clothsNumber: "Nombre vêtements",
+      basicPrice: "Prix de base",
+      totalBill: "Facture totale",
+      delivery: "Livraison",
+      rowsPerPage: "Lignes par page",
+    },
+    tr: {
+      suitNo: "Takım No",
+      name: "İsim",
+      number: "Numara",
+      lastActivity: "Son Aktivite",
+      customerInfo: "Müşteri Bilgisi",
+      address: "Adres",
+      order: "Sipariş",
+      status: "Durum",
+      kameezLength: "Kamiz Uzunluğu",
+      salwarLength: "Şalvar Uzunluğu",
+      suitStyle: "Takım Stili",
+      chest: "Göğüs",
+      waist: "Bel",
+      shoulder: "Omuz",
+      asteen: "Kol",
+      collarStyle: "Yaka Stili",
+      bottomWidth: "Çevre",
+      salwarType: "Şalvar Türü",
+      color: "Renk",
+      payment: "Ödeme",
+      clothsNumber: "Kıyafet Sayısı",
+      basicPrice: "Temel Fiyat",
+      totalBill: "Toplam Fatura",
+      delivery: "Teslimat",
+      rowsPerPage: "Sayfa başına satır",
+    }
+  };
+
+  const t = texts[language] || texts.en;
+
   // -------------------Apply pagination---------------
   const {
     currentData,
@@ -81,16 +278,16 @@ const UserHistoryTable: React.FC<UserHistoryTableProps> = ({ customer, searchTex
           <thead className="bg-gradient-to-r from-red-600 via-red-500 to-red-700 text-white text-sm uppercase tracking-wider">
             <tr>
               <th className="px-6 py-3 text-left text-base font-semibold text-gray-900 rounded-tl-lg">
-                Suit No
+                {t.suitNo}
               </th>
               <th className="px-6 py-3 text-left text-base font-semibold text-gray-900">
-                Name
+                {t.name}
               </th>
               <th className="px-6 py-3 text-left text-base font-semibold text-gray-900">
-                Number
+                {t.number}
               </th>
               <th className="px-6 py-3 text-left text-base font-semibold text-gray-900 rounded-tr-lg">
-                Last Activity
+                {t.lastActivity}
               </th>
             </tr>
           </thead>
@@ -127,7 +324,7 @@ const UserHistoryTable: React.FC<UserHistoryTableProps> = ({ customer, searchTex
                         </svg>
                       )}
                     </span>
-                    {entry.orders.length} suits
+                    {entry.orders.length} {language === 'ur' ? 'سوٹ' : language === 'hi' ? 'सूट' : language === 'ar' ? 'بدلة' : language === 'de' ? 'Anzüge' : language === 'fr' ? 'costumes' : language === 'tr' ? 'takım' : 'suits'}
                   </td>
                   <td className="px-6 py-4 text-sm md:text-base font-medium">
                     {entry.name}
@@ -146,10 +343,10 @@ const UserHistoryTable: React.FC<UserHistoryTableProps> = ({ customer, searchTex
                     <td colSpan={4} className="px-6 py-4 text-gray-600 dark:text-gray-300 text-sm">
                       {/* User Info Section */}
                       <div className="mb-6 p-4 border rounded bg-white dark:bg-gray-700 shadow-sm">
-                        <h3 className="font-medium text-lg text-gray-900 dark:text-white">Customer Information</h3>
-                        <p><strong>Name:</strong> {entry.name}</p>
-                        <p><strong>Number:</strong> {entry.number}</p>
-                        <p><strong>Address:</strong> {entry.address || 'N/A'}</p>
+                        <h3 className="font-medium text-lg text-gray-900 dark:text-white">{t.customerInfo}</h3>
+                        <p><strong>{t.name}:</strong> {entry.name}</p>
+                        <p><strong>{t.number}:</strong> {entry.number}</p>
+                        <p><strong>{t.address}:</strong> {entry.address || 'N/A'}</p>
                       </div>
 
                       {/* Orders Stepper */}
@@ -158,7 +355,7 @@ const UserHistoryTable: React.FC<UserHistoryTableProps> = ({ customer, searchTex
                           <li key={order.order_id} className="mb-10 ms-6">
                             <span
                               className="absolute flex items-center justify-center w-8 h-8 
-                                bg-green-300 rounded-full -start-4 ring-4 ring-white dark:ring-gray-800 cursor-pointer"
+                                bg-green-300 rounded-full text-black -start-4 ring-4 ring-white dark:ring-gray-800 cursor-pointer"
                               onClick={() => toggleOrder(order.order_id)}
                             >
                               {orderIndex + 1}
@@ -168,28 +365,28 @@ const UserHistoryTable: React.FC<UserHistoryTableProps> = ({ customer, searchTex
                                 className="font-medium leading-tight cursor-pointer"
                                 onClick={() => toggleOrder(order.order_id)}
                               >
-                                Order #{orderIndex + 1} — <span className={`px-2 py-1 rounded text-white ${order.status === "complete" ? "bg-green-500" : order.status === "is_preparing" ? "bg-yellow-500" : "bg-red-500"}`}>{order.status}</span>
+                                {t.order} #{orderIndex + 1} — <span className={`px-2 py-1 rounded text-white ${order.status === "complete" ? "bg-green-500" : order.status === "is_preparing" ? "bg-yellow-500" : "bg-red-500"}`}>{order.status}</span>
                               </h3>
                             </div>
                             {openOrders[order.order_id.toString()] && (
                               <div className="p-4 border rounded bg-white dark:bg-gray-700 shadow-sm mt-3">
-                                <p><strong>Kameez Length:</strong> {order.kameez_length}</p>
-                                <p><strong>Salwar Length:</strong> {order.salwar_length}</p>
-                                <p><strong>Suit Style:</strong> {order.suit_style}</p>
-                                <p><strong>Chest:</strong> {order.chest}</p>
-                                <p><strong>Waist:</strong> {order.waist}</p>
-                                <p><strong>Shoulder:</strong> {order.shoulder}</p>
-                                <p><strong>Asteen:</strong> {order.asteen}</p>
-                                <p><strong>Collar Style:</strong> {order.collarstyle}</p>
-                                <p><strong>Bottom Width:</strong> {order.bottomwidth}</p>
-                                <p><strong>Salwar Type:</strong> {order.salwartype}</p>
-                                <p><strong>Color:</strong> {order.color}</p>
-                                <p><strong>Payment:</strong> {order.payment}</p>
-                                <p><strong>Cloths Number:</strong> {order.clothsquantity}</p>
-                                <p><strong>Basic Price:</strong> {order.basicPrice}</p>
-                                <p><strong>Total Bill:</strong> {order.totalBill}</p>
-                                <p><strong>Delivery:</strong> {order.delivery}</p>
-                                <p><strong>Status:</strong> {order.status}</p>
+                                <p><strong>{t.kameezLength}:</strong> {order.kameez_length}</p>
+                                <p><strong>{t.salwarLength}:</strong> {order.salwar_length}</p>
+                                <p><strong>{t.suitStyle}:</strong> {order.suit_style}</p>
+                                <p><strong>{t.chest}:</strong> {order.chest}</p>
+                                <p><strong>{t.waist}:</strong> {order.waist}</p>
+                                <p><strong>{t.shoulder}:</strong> {order.shoulder}</p>
+                                <p><strong>{t.asteen}:</strong> {order.asteen}</p>
+                                <p><strong>{t.collarStyle}:</strong> {order.collarstyle}</p>
+                                <p><strong>{t.bottomWidth}:</strong> {order.bottomwidth}</p>
+                                <p><strong>{t.salwarType}:</strong> {order.salwartype}</p>
+                                <p><strong>{t.color}:</strong> {order.color}</p>
+                                <p><strong>{t.payment}:</strong> {order.payment}</p>
+                                <p><strong>{t.clothsNumber}:</strong> {order.clothsquantity}</p>
+                                <p><strong>{t.basicPrice}:</strong> {order.basicPrice}</p>
+                                <p><strong>{t.totalBill}:</strong> {order.totalBill}</p>
+                                <p><strong>{t.delivery}:</strong> {order.delivery}</p>
+                                <p><strong>{t.status}:</strong> {order.status}</p>
                               </div>
                             )}
                           </li>
@@ -216,7 +413,7 @@ const UserHistoryTable: React.FC<UserHistoryTableProps> = ({ customer, searchTex
             }}
           >
             <SelectTrigger className="w-[120px]">
-              <SelectValue placeholder="Rows per page" />
+              <SelectValue placeholder={t.rowsPerPage} />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="5">5</SelectItem>

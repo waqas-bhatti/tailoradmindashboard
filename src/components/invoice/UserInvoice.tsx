@@ -21,11 +21,10 @@ import { RootState, AppDispatch } from "@/lib/store";
 import useSearchParams from '@/hooks/useSearchParams';
 import { useReactToPrint } from "react-to-print";
 import InvoicePrint from './InvoicePrint';
+import { useLanguage } from "@/context/LanguageContext"; // Import language context
 
 // Remove the UserInvoiceProps interface and make component not expect any props
 export const UserInvoice: React.FC = () => {
-  // const dispatch = useDispatch<AppDispatch>();
-  // const { customers, loading, error } = useSelector((state: RootState) => state.customers);
   const {
       data: customers = [],
       isLoading,
@@ -33,6 +32,7 @@ export const UserInvoice: React.FC = () => {
       error,
     } = useGetCustomersQuery();
   const [currentOrder, setCurrentOrder] = useState<any>(null);
+  const { language } = useLanguage(); // Use global language context
 
   const printRef = useRef<HTMLDivElement>(null);
   const handlePrint = useReactToPrint({
@@ -47,17 +47,6 @@ export const UserInvoice: React.FC = () => {
       handlePrint();
     }, 100);
   };
-    
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     try {
-  //       await dispatch(fetchCustomer());
-  //     } catch (error:any) {
-  //       throw new Error("Can't be fetch the User Data", error);
-  //     }
-  //   }
-  //   fetchData();
-  // }, [dispatch]);
 
   const {
     searchText,
@@ -83,6 +72,96 @@ export const UserInvoice: React.FC = () => {
     setItemsPerPage,
   } = usePagination(filteredCustomers, 5);
 
+  // Multilingual texts
+  const texts = {
+    en: {
+      title: "Customer Invoice",
+      searchPlaceholder: "Search by name or order id",
+      name: "Name",
+      number: "Number",
+      invoice: "Invoice",
+      print: "Print",
+      loading: "Loading...",
+      error: "Error loading customers.",
+      noCustomers: "No customers found",
+      rowsPerPage: "Rows per page",
+    },
+    ur: {
+      title: "گاہک کی انوائس",
+      searchPlaceholder: "نام یا آرڈر آئی ڈی سے تلاش کریں",
+      name: "نام",
+      number: "نمبر",
+      invoice: "انوائس",
+      print: "پرنٹ",
+      loading: "لوڈ ہو رہا ہے...",
+      error: "گاہکوں کو لوڈ کرنے میں خرابی۔",
+      noCustomers: "کوئی گاہک نہیں ملا",
+      rowsPerPage: "فی صفحہ قطاریں",
+    },
+    hi: {
+      title: "ग्राहक चालान",
+      searchPlaceholder: "नाम या ऑर्डर आईडी से खोजें",
+      name: "नाम",
+      number: "नंबर",
+      invoice: "चालान",
+      print: "प्रिंट",
+      loading: "लोड हो रहा है...",
+      error: "ग्राहकों को लोड करने में त्रुटि।",
+      noCustomers: "कोई ग्राहक नहीं मिला",
+      rowsPerPage: "प्रति पृष्ठ पंक्तियाँ",
+    },
+    ar: {
+      title: "فاتورة العميل",
+      searchPlaceholder: "البحث بالاسم أو معرف الطلب",
+      name: "الاسم",
+      number: "الرقم",
+      invoice: "فاتورة",
+      print: "طباعة",
+      loading: "جاري التحميل...",
+      error: "خطأ في تحميل العملاء.",
+      noCustomers: "لم يتم العثور على عملاء",
+      rowsPerPage: "صفوف في الصفحة",
+    },
+    de: {
+      title: "Kundenrechnung",
+      searchPlaceholder: "Suche nach Name oder Bestell-ID",
+      name: "Name",
+      number: "Nummer",
+      invoice: "Rechnung",
+      print: "Drucken",
+      loading: "Lädt...",
+      error: "Fehler beim Laden der Kunden.",
+      noCustomers: "Keine Kunden gefunden",
+      rowsPerPage: "Zeilen pro Seite",
+    },
+    fr: {
+      title: "Facture client",
+      searchPlaceholder: "Rechercher par nom ou ID de commande",
+      name: "Nom",
+      number: "Numéro",
+      invoice: "Facture",
+      print: "Imprimer",
+      loading: "Chargement...",
+      error: "Erreur lors du chargement des clients.",
+      noCustomers: "Aucun client trouvé",
+      rowsPerPage: "Lignes par page",
+    },
+    tr: {
+      title: "Müşteri Faturası",
+      searchPlaceholder: "İsim veya sipariş ID ile ara",
+      name: "İsim",
+      number: "Numara",
+      invoice: "Fatura",
+      print: "Yazdır",
+      loading: "Yükleniyor...",
+      error: "Müşteriler yüklenirken hata.",
+      noCustomers: "Müşteri bulunamadı",
+      rowsPerPage: "Sayfa başına satır",
+    }
+  };
+
+  const t = texts[language] || texts.en;
+
   return (
     <div className="overflow-x-auto p-6 bg-gray-100 dark:bg-gray-800 min-h-screen">
       <div className="hidden">
@@ -94,12 +173,12 @@ export const UserInvoice: React.FC = () => {
       </div>
       {/* Header with search */}
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-50">Customer Invoice</h2>
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-50">{t.title}</h2>
         <div className="relative flex items-center">
           <input
             type="text"
             value={searchText}
-            placeholder="Search by name or order id"
+            placeholder={t.searchPlaceholder}
             onChange={(e) => setSearchText(e.target.value)}
             onKeyDown={((e) => {
               if (e.key === "Enter") {
@@ -137,15 +216,15 @@ export const UserInvoice: React.FC = () => {
       <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-900 rounded-lg shadow-md">
         <thead className="bg-gradient-to-r from-red-600 via-red-500 to-red-700 text-white text-sm uppercase tracking-wider">
           <tr>
-            <th className="px-6 py-3 rounded-tl-lg">Name</th>
-            <th className="px-6 py-3">Number</th>
-            <th className="px-6 py-3 text-right rounded-tr-lg">Invoice</th>
+            <th className="px-6 py-3 rounded-tl-lg">{t.name}</th>
+            <th className="px-6 py-3">{t.number}</th>
+            <th className="px-6 py-3 text-right rounded-tr-lg">{t.invoice}</th>
           </tr>
         </thead>
         <tbody>
           {isLoading && (
             <tr>
-              <td colSpan={3} className="text-center py-4">Loading...</td>
+              <td colSpan={3} className="text-center py-4">{t.loading}</td>
             </tr>
           )}
           {error && (
@@ -155,7 +234,7 @@ export const UserInvoice: React.FC = () => {
           )}
           {currentData.length === 0 && !isLoading && (
             <tr>
-              <td colSpan={3} className="text-center py-4">No customers found</td>
+              <td colSpan={3} className="text-center py-4">{t.noCustomers}</td>
             </tr>
           )}
           {currentData.map((c) => (
@@ -169,7 +248,7 @@ export const UserInvoice: React.FC = () => {
                   onClick={() => printOrder(c)}
                   className="ml-4 px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm"
                 >
-                  Print
+                  {t.print}
                 </button>
               </td>
             </tr>
@@ -188,7 +267,7 @@ export const UserInvoice: React.FC = () => {
             }}
           >
             <SelectTrigger className="w-[120px]">
-              <SelectValue placeholder="Rows per page" />
+              <SelectValue placeholder={t.rowsPerPage} />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="5">5</SelectItem>

@@ -179,6 +179,7 @@ const HomePage = () => {
               <li>✅ Online Service</li>
               <li>✅ Save Time</li>
               <li>✅ Easy to Use</li>
+              <li>✅ Data Form Support 7 Languages</li>
             </ul>
           </div>
         </div>

@@ -1,4 +1,4 @@
-import { Client, Account, ID, Models } from "appwrite";
+import { Client, Account, ID, Models, OAuthProvider } from "appwrite";
 import config from "@/Config/config";
 
 export class AuthService {
@@ -52,6 +52,18 @@ export class AuthService {
       } else {
         throw new Error(`Login failed: ${error.message}`);
       }
+    }
+  }
+
+  async googleLogin(): Promise <void> {
+    try {
+      this.account.createOAuth2Session(
+        OAuthProvider.Google,
+        "http://localhost:3000/dashboard",
+        "https://tailorix.netlify.app/dashboard"
+      );
+    } catch (error:any) {
+      throw new Error("Error Login with Gmail")
     }
   }
 

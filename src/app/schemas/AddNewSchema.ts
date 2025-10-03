@@ -34,6 +34,8 @@ export const userDetailSchema = z.object({
   clothsquantity: z.string().nonempty("Cloths number is required"),
   status: z.string().nonempty("Status is required"),
   totalBill: z.string().nonempty("Total bill is required"),
+  advanceAmount: z.string().optional(),
+  remeaningAmount: z.string().optional(),
   basicPrice: z.string().nonempty("Basic price is required"),
   delivery: z.string().nonempty("Delivery is required"),
   delivery_date: z.string().nullable(),

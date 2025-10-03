@@ -7,6 +7,7 @@ import { useGetCustomersQuery } from "@/lib/reduxStore/customers/customersApi";
 import { RootState } from "@/lib/store";
 import { useDispatch, useSelector } from "react-redux";
 import useSearchParams from "@/hooks/useSearchParams";
+import { useLanguage } from "@/context/LanguageContext"; // Import language context
 
 const UserHistory: React.FC = () => {
   const {
@@ -18,6 +19,7 @@ const UserHistory: React.FC = () => {
   
   const totalCustomers = customers.length;
   const totalOrders = new Set(customers.map((c) => c.number)).size;
+  const { language } = useLanguage(); // Use global language context
 
   const {
     searchText,
@@ -28,22 +30,77 @@ const UserHistory: React.FC = () => {
     isSearching,
   } = useSearchParams(300);
 
+  // Multilingual texts
+  const texts = {
+    en: {
+      title: "CUSTOMER HISTORY",
+      totalCustomers: `Total Customers : [${totalOrders} Order of ${totalCustomers} Customer]`,
+      searchPlaceholder: "Search by name or order id",
+      loading: "Loading...",
+      error: "Error loading customers. Please try again.",
+    },
+    ur: {
+      title: "گاہک کی تاریخ",
+      totalCustomers: `کل گاہک : [${totalOrders} آرڈر ${totalCustomers} گاہک کا]`,
+      searchPlaceholder: "نام یا آرڈر آئی ڈی سے تلاش کریں",
+      loading: "لوڈ ہو رہا ہے...",
+      error: "گاہکوں کو لوڈ کرنے میں خرابی۔ براہ کرم دوبارہ کوشش کریں۔",
+    },
+    hi: {
+      title: "ग्राहक इतिहास",
+      totalCustomers: `कुल ग्राहक : [${totalOrders} ऑर्डर ${totalCustomers} ग्राहक का]`,
+      searchPlaceholder: "नाम या ऑर्डर आईडी से खोजें",
+      loading: "लोड हो रहा है...",
+      error: "ग्राहकों को लोड करने में त्रुटि। कृपया पुनः प्रयास करें।",
+    },
+    ar: {
+      title: "سجل العميل",
+      totalCustomers: `إجمالي العملاء : [${totalOrders} طلب من ${totalCustomers} عميل]`,
+      searchPlaceholder: "البحث بالاسم أو معرف الطلب",
+      loading: "جاري التحميل...",
+      error: "خطأ في تحميل العملاء. يرجى المحاولة مرة أخرى.",
+    },
+    de: {
+      title: "KUNDENVERLAUF",
+      totalCustomers: `Gesamtkunden : [${totalOrders} Bestellung von ${totalCustomers} Kunde]`,
+      searchPlaceholder: "Suche nach Name oder Bestell-ID",
+      loading: "Lädt...",
+      error: "Fehler beim Laden der Kunden. Bitte versuchen Sie es erneut.",
+    },
+    fr: {
+      title: "HISTORIQUE CLIENT",
+      totalCustomers: `Clients totaux : [${totalOrders} Commande de ${totalCustomers} Client]`,
+      searchPlaceholder: "Rechercher par nom ou ID de commande",
+      loading: "Chargement...",
+      error: "Erreur lors du chargement des clients. Veuillez réessayer.",
+    },
+    tr: {
+      title: "MÜŞTERİ GEÇMİŞİ",
+      totalCustomers: `Toplam Müşteri : [${totalOrders} Sipariş ${totalCustomers} Müşteri]`,
+      searchPlaceholder: "İsim veya sipariş ID ile ara",
+      loading: "Yükleniyor...",
+      error: "Müşteriler yüklenirken hata. Lütfen tekrar deneyin.",
+    }
+  };
+
+  const t = texts[language] || texts.en;
+
   return (
     <>
       {/* Main Content */}
       <div className="flex-1 p-6">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl text-blue-800 font-bold">CUSTOMER HISTORY</h2>
+          <h2 className="text-2xl text-blue-800 font-bold">{t.title}</h2>
           <div className="flex justify-between items-center">
             <h2 className="text-xl font-semibold text-gray-700 dark:text-gray-300">
-              Total Customers : [{totalOrders} Order of {totalCustomers} Customer]
+              {t.totalCustomers}
             </h2>
           </div>
           <div className="relative flex items-center">
             <input
               type="text"
               value={searchText}
-              placeholder="Search by name or order id"
+              placeholder={t.searchPlaceholder}
               onChange={(e) => setSearchText(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
@@ -82,13 +139,13 @@ const UserHistory: React.FC = () => {
         {isLoading && (
           <div className="flex justify-center items-center py-8">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            <span className="ml-2">Loading...</span>
+            <span className="ml-2">{t.loading}</span>
           </div>
         )}
         
         {isError && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-            Error loading customers. Please try again.
+            {t.error}
           </div>
         )}
 
