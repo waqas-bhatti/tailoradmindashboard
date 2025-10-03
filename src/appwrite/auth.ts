@@ -59,7 +59,6 @@ export class AuthService {
     try {
       this.account.createOAuth2Session(
         OAuthProvider.Google,
-        "http://localhost:3000/dashboard",
         "https://tailorix.netlify.app/dashboard"
       );
     } catch (error:any) {
